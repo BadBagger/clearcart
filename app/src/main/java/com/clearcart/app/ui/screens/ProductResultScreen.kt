@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -59,6 +59,7 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -68,13 +69,13 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
             return@Column
         }
         Text(p.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text(listOf(p.brand, p.category).filter { it.isNotBlank() }.joinToString(" • "))
+        Text(listOf(p.brand, p.category).filter { it.isNotBlank() }.joinToString(" / "))
         p.imageUrl?.let { AsyncImage(model = it, contentDescription = p.name, modifier = Modifier.fillMaxWidth()) }
         SectionCard { ScoreHeader(s) }
         SectionCard {
             Text("Why this score?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             (s.positiveList + s.cautionList + s.explanationList).forEach {
-                Text("• ${it.text}\n${it.evidence}${if (it.isPreferenceBased) " This reflects your preferences." else ""}")
+                Text("- ${it.text}\n${it.evidence}${if (it.isPreferenceBased) " This reflects your preferences." else ""}")
             }
         }
         SectionCard {
@@ -96,20 +97,23 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
                 Text("No stronger alternatives are available from cached or mock data yet.")
             } else {
                 alternatives.forEach {
-                    Text("${it.product.name} • ${it.score.overallScore}")
+                    Text("${it.product.name} / ${it.score.overallScore}")
                     Text(it.whyBetter)
                     it.tradeoff?.let { tradeoff -> Text(tradeoff) }
                 }
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            OutlinedButton(onClick = {
-                scope.launch { container.productRepository.setFavorite(p.barcode, true) }
-            }, modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = { scope.launch { container.productRepository.setFavorite(p.barcode, true) } },
+                modifier = Modifier.weight(1f),
+            ) {
                 Icon(Icons.Default.FavoriteBorder, null)
                 Text("Favorite")
             }
-            Button(onClick = { navController.navigate("compare") }, modifier = Modifier.weight(1f)) { Text("Compare") }
+            Button(onClick = { navController.navigate("compare") }, modifier = Modifier.weight(1f)) {
+                Text("Compare")
+            }
         }
         Text("For medical dietary needs, check with a professional.")
     }

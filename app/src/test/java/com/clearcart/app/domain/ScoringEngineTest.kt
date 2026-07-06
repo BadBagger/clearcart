@@ -30,7 +30,7 @@ class ScoringEngineTest {
         val score = engine.score(product, UserPreferences(lowSugar = true))
 
         assertTrue(score.cautionList.any { it.text.contains("low sugar preference", ignoreCase = true) })
-        assertTrue(score.subscores.any { it.name == "Sugar" && it.detail.contains("18.0") })
+        assertTrue(score.subscores.any { it.name == "Sugar" && it.detail.contains("18 g") })
     }
 
     @Test
@@ -42,6 +42,25 @@ class ScoringEngineTest {
         val allergenCaution = score.cautionList.first { it.text.contains("allergens", ignoreCase = true) }
         assertTrue(allergenCaution.isPreferenceBased)
         assertTrue(allergenCaution.evidence.contains("milk"))
+    }
+
+    @Test
+    fun missingSaturatedFatIsNotPresentedAsLowSaturatedFat() {
+        val product = foodProduct(
+            nutrition = Nutrition(
+                energyKcal100g = 380.0,
+                sugar100g = 4.0,
+                sodium100g = 0.1,
+                saturatedFat100g = null,
+                fiber100g = 7.0,
+                protein100g = 9.0,
+            ),
+        )
+
+        val score = engine.score(product, UserPreferences())
+
+        assertTrue(score.positiveList.none { it.text.contains("Low saturated fat", ignoreCase = true) })
+        assertTrue(score.subscores.any { it.name == "Saturated fat" && it.detail == "Missing per 100g." })
     }
 
     @Test

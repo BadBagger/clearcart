@@ -8,6 +8,7 @@ import com.clearcart.app.data.model.ProductType
 import com.clearcart.app.data.model.ScoreNote
 import com.clearcart.app.data.model.ScoreSubscore
 import com.clearcart.app.data.model.UserPreferences
+import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 class ScoringEngine(
@@ -43,14 +44,20 @@ class ScoringEngine(
         val explanations = mutableListOf<ScoreNote>()
 
         product.nutrition?.let {
-            if ((it.sugar100g ?: 0.0) > 12) cautions += ScoreNote("Higher sugar than many similar products", "${it.sugar100g}g sugar per 100g.")
-            if ((it.fiber100g ?: 0.0) >= 5) positives += ScoreNote("Good fiber content", "${it.fiber100g}g fiber per 100g.")
-            if ((it.saturatedFat100g ?: 0.0) <= 1.5) positives += ScoreNote("Low saturated fat", "${it.saturatedFat100g}g saturated fat per 100g.")
+            it.sugar100g?.let { value ->
+                if (value > 12) cautions += ScoreNote("Higher sugar than many similar products", "${formatGrams(value)} sugar per 100g.")
+            }
+            it.fiber100g?.let { value ->
+                if (value >= 5) positives += ScoreNote("Good fiber content", "${formatGrams(value)} fiber per 100g.")
+            }
+            it.saturatedFat100g?.let { value ->
+                if (value <= 1.5) positives += ScoreNote("Low saturated fat", "${formatGrams(value)} saturated fat per 100g.")
+            }
         }
         if ((product.novaGroup ?: 0) >= 4) cautions += ScoreNote("More processed product profile", "NOVA group ${product.novaGroup}; this is a general food-processing signal.")
         if (product.additives.isNotEmpty()) cautions += ScoreNote("Contains ${product.additives.size} listed additives", "Additives are listed by the source database; concern depends on context.")
         if (preferences.lowSugar && (product.nutrition?.sugar100g ?: 0.0) > 8) cautions += ScoreNote("Flagged based on your low sugar preference", "This is a preference match issue, not a medical claim.", true)
-        if (preferences.lowSodium && (product.nutrition?.sodium100g ?: 0.0) > 0.3) cautions += ScoreNote("Flagged based on your low sodium preference", "Sodium is ${product.nutrition?.sodium100g}g per 100g.", true)
+        if (preferences.lowSodium && (product.nutrition?.sodium100g ?: 0.0) > 0.3) cautions += ScoreNote("Flagged based on your low sodium preference", "Sodium is ${formatGrams(product.nutrition?.sodium100g)} per 100g.", true)
         if (preferences.avoidFragrance && product.ingredientsText.contains("fragrance", true)) cautions += ScoreNote("Contains fragrance", "Some sensitive-skin users prefer to avoid fragrance.", true)
         val allergenConflicts = product.allergens.map { it.lowercase() }.intersect(preferences.allergensToAvoid.map { it.lowercase() }.toSet())
         if (allergenConflicts.isNotEmpty()) cautions += ScoreNote("Contains allergens you chose to avoid", allergenConflicts.joinToString(), true)
@@ -75,11 +82,11 @@ class ScoringEngine(
             ScoreSubscore("Nutrition quality", scoreNutri(product.nutriScore), "Based on public nutrition grade when available."),
             ScoreSubscore("Ultra-processing / NOVA group", when (product.novaGroup) { 1 -> 95; 2 -> 80; 3 -> 62; 4 -> 38; else -> 55 }, "NOVA is a processing signal, not a moral label."),
             ScoreSubscore("Additives", (100 - product.additives.size * 12).coerceAtLeast(35), "${product.additives.size} additives listed."),
-            ScoreSubscore("Sugar", thresholdScore(n?.sugar100g, 5.0, 12.0, true), "${n?.sugar100g ?: "Missing"}g per 100g."),
-            ScoreSubscore("Sodium", thresholdScore(n?.sodium100g, 0.12, 0.5, true), "${n?.sodium100g ?: "Missing"}g per 100g."),
-            ScoreSubscore("Saturated fat", thresholdScore(n?.saturatedFat100g, 1.5, 5.0, true), "${n?.saturatedFat100g ?: "Missing"}g per 100g."),
-            ScoreSubscore("Fiber", thresholdScore(n?.fiber100g, 3.0, 6.0, false), "${n?.fiber100g ?: "Missing"}g per 100g."),
-            ScoreSubscore("Protein", thresholdScore(n?.protein100g, 5.0, 12.0, false), "${n?.protein100g ?: "Missing"}g per 100g."),
+            ScoreSubscore("Sugar", thresholdScore(n?.sugar100g, 5.0, 12.0, true), "${formatGrams(n?.sugar100g)} per 100g."),
+            ScoreSubscore("Sodium", thresholdScore(n?.sodium100g, 0.12, 0.5, true), "${formatGrams(n?.sodium100g)} per 100g."),
+            ScoreSubscore("Saturated fat", thresholdScore(n?.saturatedFat100g, 1.5, 5.0, true), "${formatGrams(n?.saturatedFat100g)} per 100g."),
+            ScoreSubscore("Fiber", thresholdScore(n?.fiber100g, 3.0, 6.0, false), "${formatGrams(n?.fiber100g)} per 100g."),
+            ScoreSubscore("Protein", thresholdScore(n?.protein100g, 5.0, 12.0, false), "${formatGrams(n?.protein100g)} per 100g."),
             ScoreSubscore("Allergen match", if (conflicts.isEmpty()) 100 else 25, if (conflicts.isEmpty()) "No selected allergen conflict found." else "Matches ${conflicts.joinToString()}."),
             ScoreSubscore("User preference match", preferenceScore(product, preferences), "Reflects the preferences you selected."),
             ScoreSubscore("Ingredient clarity", ingredientClarity(product), "Readable ingredient list signal."),
@@ -158,6 +165,11 @@ class ScoringEngine(
         score >= 56 -> Grade.Okay
         score >= 40 -> Grade.Caution
         else -> Grade.AvoidOften
+    }
+
+    private fun formatGrams(value: Double?): String {
+        if (value == null) return "Missing"
+        return "${DecimalFormat("0.##").format(value)} g"
     }
 }
 
