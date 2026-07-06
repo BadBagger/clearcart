@@ -1,5 +1,11 @@
 # ClearCart Project Context
 
+## Repo
+
+- GitHub: `https://github.com/BadBagger/clearcart`
+- Android package: `com.clearcart.app`
+- Latest APK release: none
+
 ## Current State
 
 ClearCart MVP has been scaffolded as a native Android Kotlin app using Jetpack Compose and Material 3.
@@ -73,22 +79,35 @@ Mock fallback data includes:
 0099999999999
 ```
 
+## DevHub
+
+ClearCart is not connected to the DevHub Android app yet. To connect it, update the DevHub repo:
+
+- `apps.yml`
+- `android-app/app/src/main/AndroidManifest.xml`
+- `android-app/app/src/main/java/com/softsmith/devhub/MainActivity.java`
+- Store icon and preview assets
+- DevHub `PROJECT_CONTEXT.md`
+
+DevHub detects updates from GitHub Releases with APK assets attached. Source-only pushes do not update the app listing.
+
 ## Known Gaps
 
 - Live camera OCR capture is not wired yet; the OCR screen currently supports editable text and parsing structure.
 - Open Beauty Facts support now has a separate Retrofit provider structure, but needs broader real-world validation against cosmetics barcodes.
 - Alternatives currently use mock/cached product data only.
 - Compare screen now uses full cached product snapshots where available and lets users select the two scanned products to compare.
-- Release signing and GitHub publishing are not complete.
-- GitHub CLI was not available on PATH during the first publish attempt.
+- Release signing is not configured.
+- GitHub release with APK asset is not created yet.
 
 ## Suggested Next Steps
 
-1. Initialize git and publish to GitHub after GitHub CLI is installed/authenticated or after a target repo is provided through another available connector.
+1. Push source to GitHub.
 2. Add a release signing config and produce a release APK.
-3. Validate Open Beauty Facts lookup against real cosmetics/personal-care barcodes.
-4. Wire live OCR camera capture with ML Kit Text Recognition.
-5. Expand tests around provider fallback, Room snapshot persistence, and comparison tradeoff logic.
+3. Create a GitHub Release with APK assets so DevHub can detect the app.
+4. Validate Open Beauty Facts lookup against real cosmetics/personal-care barcodes.
+5. Wire live OCR camera capture with ML Kit Text Recognition.
+6. Expand tests around provider fallback, Room snapshot persistence, and comparison tradeoff logic.
 7. Add data attribution UI for Open Food Facts and Open Beauty Facts.
 
 ## Coordination Pattern
@@ -99,5 +118,6 @@ Future chats should:
 
 - Read `AGENTS.md`.
 - Read this file.
+- Read the SoftSmith DevHub `AGENTS.md` and `PROJECT_CONTEXT.md` before publishing.
 - Inspect current source files before editing.
 - Update this file when project state, known gaps, build commands, or next steps materially change.

@@ -56,12 +56,26 @@ app/build/outputs/apk/debug/app-debug.apk
 0099999999999
 ```
 
+## Publishing Rule
+
+DevHub detects Android updates from GitHub Releases with APK assets attached. Pushing source code alone is not enough for DevHub distribution.
+
+When publishing an app update:
+
+1. Bump `versionCode`.
+2. Set a new `versionName`.
+3. Run tests.
+4. Build the APK.
+5. Commit and push source.
+6. Create a GitHub Release with an APK attached.
+
 ## Current Gaps
 
 - Live camera OCR capture is not wired yet.
 - Open Beauty Facts provider needs validation against real cosmetics and personal-care barcodes.
 - Alternatives currently use mock/cached product data.
 - Release signing is not configured.
+- First GitHub Release with APK asset is not created yet.
 
 ## Coordination
 

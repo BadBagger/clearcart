@@ -1,5 +1,12 @@
 # ClearCart Agent Guide
 
+Future Codex chats working in this repository should also read the shared SoftSmith DevHub context:
+
+```text
+C:\Users\KyleB\Documents\Codex\2026-07-05\create-a-private-developer-repository-hub\outputs\softsmith-devhub\AGENTS.md
+C:\Users\KyleB\Documents\Codex\2026-07-05\create-a-private-developer-repository-hub\outputs\softsmith-devhub\PROJECT_CONTEXT.md
+```
+
 ## Project
 
 ClearCart is a native Android app inspired by product scanner apps, but it must not copy Yuka branding, UI, wording, assets, layout, or scoring formula.
@@ -25,6 +32,7 @@ On Windows PowerShell:
 ```powershell
 $env:JAVA_HOME='C:\Users\KyleB\Documents\Codex\2026-07-04\build-a-native-android-app-using\.local-jdk\jdk-17.0.19+10'
 $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
+.\gradlew.bat :app:testDebugUnitTest
 .\gradlew.bat :app:assembleDebug
 ```
 
@@ -103,26 +111,23 @@ Keep boundaries modular:
 - Do not hide raw facts because of preferences.
 - Show confidence prominently on product result screens.
 
-## Current MVP Scope
-
-Prioritize a working MVP before advanced features:
-
-1. Scanner
-2. Product lookup
-3. Result screen
-4. Score explanation
-5. Preferences
-6. Local history
-7. Manual entry
-8. Basic OCR fallback structure
-9. Comparison
-10. Mock data for testing
-
 ## Publishing Notes
 
-When publishing to GitHub:
+DevHub detects Android updates from GitHub Releases with APK assets attached. Pushing source code alone is not enough for DevHub app updates.
 
-- Do not commit generated build output such as `app/build/`.
-- Do not commit local-only files containing machine paths unless intentionally needed.
-- Prefer a clean commit message such as `Build ClearCart MVP`.
-- Open a draft PR unless the user explicitly asks for ready-for-review.
+When publishing an Android update:
+
+1. Bump `versionCode`.
+2. Set a new `versionName`.
+3. Run tests.
+4. Build the APK.
+5. Commit and push source.
+6. Create a GitHub Release with an APK attached.
+
+Use GitHub CLI directly if it is not on PATH:
+
+```powershell
+& 'C:\Program Files\GitHub CLI\gh.exe'
+```
+
+Do not commit generated build output, secrets, signing keys, keystores, Play Store credentials, or service account files.
