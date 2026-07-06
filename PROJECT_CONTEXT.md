@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: none
+- Latest APK release: `v0.1.0`
 
 ## Current State
 
@@ -58,6 +58,15 @@ Output APK:
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
+## Latest Release
+
+- Tag: `v0.1.0`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.0`
+- Assets:
+  - `ClearCart.apk`
+  - `ClearCart-debug-v0.1.0.apk`
+- Release notes: Initial ClearCart Android release. Build and unit tests passed.
+
 ## Important Constraints
 
 - Do not copy Yuka branding, UI, wording, assets, layout, or exact scoring formula.
@@ -97,18 +106,16 @@ DevHub detects updates from GitHub Releases with APK assets attached. Source-onl
 - Open Beauty Facts support now has a separate Retrofit provider structure, but needs broader real-world validation against cosmetics barcodes.
 - Alternatives currently use mock/cached product data only.
 - Compare screen now uses full cached product snapshots where available and lets users select the two scanned products to compare.
-- Release signing is not configured.
-- GitHub release with APK asset is not created yet.
+- Release signing is not configured; the current release uses the debug APK.
 
 ## Suggested Next Steps
 
-1. Push source to GitHub.
-2. Add a release signing config and produce a release APK.
-3. Create a GitHub Release with APK assets so DevHub can detect the app.
-4. Validate Open Beauty Facts lookup against real cosmetics/personal-care barcodes.
-5. Wire live OCR camera capture with ML Kit Text Recognition.
-6. Expand tests around provider fallback, Room snapshot persistence, and comparison tradeoff logic.
-7. Add data attribution UI for Open Food Facts and Open Beauty Facts.
+1. Add a release signing config and produce a signed release APK.
+2. Add ClearCart to the DevHub registry/listing after deciding icon and preview assets.
+3. Validate Open Beauty Facts lookup against real cosmetics/personal-care barcodes.
+4. Wire live OCR camera capture with ML Kit Text Recognition.
+5. Expand tests around provider fallback, Room snapshot persistence, and comparison tradeoff logic.
+6. Add data attribution UI for Open Food Facts and Open Beauty Facts.
 
 ## Coordination Pattern
 
