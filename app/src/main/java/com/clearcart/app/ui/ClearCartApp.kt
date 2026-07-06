@@ -16,6 +16,7 @@ import com.clearcart.app.ui.screens.PreferencesScreen
 import com.clearcart.app.ui.screens.PrivacyScreen
 import com.clearcart.app.ui.screens.ProductResultScreen
 import com.clearcart.app.ui.screens.ScannerScreen
+import com.clearcart.app.ui.screens.SearchScreen
 import com.clearcart.app.ui.screens.SettingsScreen
 
 @Composable
@@ -24,6 +25,7 @@ fun ClearCartApp(container: AppContainer) {
     NavHost(navController = navController, startDestination = "home") {
         composable("home") { HomeScreen(container, navController) }
         composable("scanner") { ScannerScreen(container, navController) }
+        composable("search") { SearchScreen(container, navController) }
         composable(
             "product/{barcode}",
             arguments = listOf(navArgument("barcode") { type = NavType.StringType }),

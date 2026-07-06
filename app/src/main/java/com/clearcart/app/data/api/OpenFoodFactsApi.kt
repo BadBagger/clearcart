@@ -2,15 +2,22 @@ package com.clearcart.app.data.api
 
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface OpenFoodFactsApi {
     @GET("api/v2/product/{barcode}.json?fields=code,status,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
     suspend fun product(@Path("barcode") barcode: String): OffResponse
+
+    @GET("cgi/search.pl?search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
+    suspend fun search(@Query("search_terms") query: String): OffSearchResponse
 }
 
 interface OpenBeautyFactsApi {
     @GET("api/v2/product/{barcode}.json?fields=code,status,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
     suspend fun product(@Path("barcode") barcode: String): OffResponse
+
+    @GET("cgi/search.pl?search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
+    suspend fun search(@Query("search_terms") query: String): OffSearchResponse
 }
 
 data class OffResponse(
@@ -18,7 +25,12 @@ data class OffResponse(
     val product: OffProduct?,
 )
 
+data class OffSearchResponse(
+    val products: List<OffProduct>?,
+)
+
 data class OffProduct(
+    val code: String?,
     val product_name: String?,
     val brands: String?,
     val categories_tags: List<String>?,

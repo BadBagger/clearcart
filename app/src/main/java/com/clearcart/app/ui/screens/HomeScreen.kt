@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
@@ -49,6 +50,11 @@ fun HomeScreen(container: AppContainer, navController: NavController) {
             Icon(Icons.Default.CameraAlt, null)
             Spacer(Modifier.padding(6.dp))
             Text("Scan Product")
+        }
+        OutlinedButton(onClick = { navController.navigate("search") }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Icon(Icons.Default.Search, null)
+            Spacer(Modifier.padding(6.dp))
+            Text("Search Products")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ElevatedButton(onClick = { navController.navigate("compare") }, modifier = Modifier.weight(1f)) {

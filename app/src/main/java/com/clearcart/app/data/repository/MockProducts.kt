@@ -46,5 +46,15 @@ object MockProducts {
 
     fun byBarcode(barcode: String): Product? = products.firstOrNull { it.barcode == barcode }
     fun alternatives(category: String): List<Product> = products.filter { it.category == category }
+    fun search(query: String): List<Product> {
+        val normalized = query.trim()
+        if (normalized.isBlank()) return emptyList()
+        return products.filter {
+            it.name.contains(normalized, ignoreCase = true) ||
+                it.brand.contains(normalized, ignoreCase = true) ||
+                it.category.contains(normalized, ignoreCase = true) ||
+                it.ingredientsText.contains(normalized, ignoreCase = true)
+        }
+    }
     fun all(): List<Product> = products
 }

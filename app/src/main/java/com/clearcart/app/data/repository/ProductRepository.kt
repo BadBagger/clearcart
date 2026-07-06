@@ -27,6 +27,21 @@ class ProductRepository(
         product
     }
 
+    suspend fun searchProducts(query: String): Result<List<Product>> = runCatching {
+        val trimmed = query.trim()
+        if (trimmed.length < 2) return@runCatching emptyList()
+        val remoteResults = providers.flatMap { provider ->
+            runCatching { provider.search(trimmed) }.getOrDefault(emptyList())
+        }
+        (remoteResults + MockProducts.search(trimmed))
+            .distinctBy { it.barcode }
+            .take(30)
+    }
+
+    suspend fun saveSearchedProduct(product: Product, preferences: UserPreferences) {
+        saveScan(product, preferences)
+    }
+
     suspend fun saveManual(product: Product, preferences: UserPreferences) {
         saveScan(product, preferences)
     }

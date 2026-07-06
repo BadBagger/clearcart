@@ -7,6 +7,7 @@ It is inspired by the general product-scanner category, but it does not copy Yuk
 ## What It Does
 
 - Scans product barcodes with CameraX and ML Kit Barcode Scanning.
+- Searches products by name, brand, category, or ingredient on a separate search screen.
 - Looks up food product data through an Open Food Facts provider structure.
 - Includes an Open Beauty Facts provider structure for cosmetics and personal care expansion.
 - Saves scan history locally with Room.

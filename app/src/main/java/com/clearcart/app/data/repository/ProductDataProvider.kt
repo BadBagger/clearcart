@@ -13,6 +13,7 @@ import com.clearcart.app.domain.confidence.ConfidenceEngine
 interface ProductDataProvider {
     val name: String
     suspend fun lookup(barcode: String): Product?
+    suspend fun search(query: String): List<Product>
 }
 
 class OpenFoodFactsProvider(
@@ -32,6 +33,20 @@ class OpenFoodFactsProvider(
             confidenceEngine = confidenceEngine,
         )
     }
+
+    override suspend fun search(query: String): List<Product> {
+        return api.search(query).products.orEmpty()
+            .mapNotNull { product ->
+                val barcode = product.code?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                product.toProduct(
+                    barcode = barcode,
+                    source = ProductSource.OpenFoodFacts,
+                    type = ProductType.Food,
+                    raw = product.toString(),
+                    confidenceEngine = confidenceEngine,
+                )
+            }
+    }
 }
 
 class OpenBeautyFactsProvider(
@@ -50,6 +65,20 @@ class OpenBeautyFactsProvider(
             raw = response.toString(),
             confidenceEngine = confidenceEngine,
         )
+    }
+
+    override suspend fun search(query: String): List<Product> {
+        return api.search(query).products.orEmpty()
+            .mapNotNull { product ->
+                val barcode = product.code?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                product.toProduct(
+                    barcode = barcode,
+                    source = ProductSource.OpenBeautyFacts,
+                    type = ProductType.Cosmetic,
+                    raw = product.toString(),
+                    confidenceEngine = confidenceEngine,
+                )
+            }
     }
 }
 

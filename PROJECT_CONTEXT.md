@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.1`
+- Latest APK release: `v0.1.2`
 
 ## Current State
 
@@ -14,6 +14,7 @@ The app currently includes:
 
 - Home dashboard
 - Barcode scanner screen with CameraX and ML Kit Barcode Scanning
+- Dedicated product search screen for name, brand, category, or ingredient lookup
 - Manual barcode entry
 - Open Food Facts Retrofit API structure
 - Modular product provider structure
@@ -60,12 +61,12 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## Latest Release
 
-- Tag: `v0.1.1`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.1`
+- Tag: `v0.1.2`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.2`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-debug-v0.1.1.apk`
-- Release notes: Polishes product result layout from device screenshots. Fixes status bar overlap, improves bottom spacing, formats nutrition values, and avoids presenting missing saturated fat as a positive. Build and unit tests passed.
+  - `ClearCart-debug-v0.1.2.apk`
+- Release notes: Adds a dedicated product search screen, text search provider support for Open Food Facts and Open Beauty Facts, and mock search fallback. Build and unit tests passed.
 
 ## Important Constraints
 
