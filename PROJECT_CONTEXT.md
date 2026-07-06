@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.0`
+- Latest APK release: `v0.1.1`
 
 ## Current State
 
@@ -60,12 +60,12 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## Latest Release
 
-- Tag: `v0.1.0`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.0`
+- Tag: `v0.1.1`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.1`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-debug-v0.1.0.apk`
-- Release notes: Initial ClearCart Android release. Build and unit tests passed.
+  - `ClearCart-debug-v0.1.1.apk`
+- Release notes: Polishes product result layout from device screenshots. Fixes status bar overlap, improves bottom spacing, formats nutrition values, and avoids presenting missing saturated fat as a positive. Build and unit tests passed.
 
 ## Important Constraints
 

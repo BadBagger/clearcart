@@ -75,7 +75,7 @@ When publishing an app update:
 - Open Beauty Facts provider needs validation against real cosmetics and personal-care barcodes.
 - Alternatives currently use mock/cached product data.
 - Release signing is not configured.
-- First GitHub Release with APK asset is not created yet.
+- Latest GitHub Release uses the debug APK while release signing remains TODO.
 
 ## Coordination
 
