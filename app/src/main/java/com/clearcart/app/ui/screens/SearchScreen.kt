@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -34,8 +35,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.clearcart.app.data.model.Product
+import com.clearcart.app.data.model.ProductSource
 import com.clearcart.app.data.repository.AppContainer
-import com.clearcart.app.domain.scoring.display
 import com.clearcart.app.ui.components.ConfidenceBadge
 import com.clearcart.app.ui.components.SectionCard
 import kotlinx.coroutines.launch
@@ -71,6 +72,7 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .imePadding()
             .navigationBarsPadding()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -79,7 +81,12 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
         Text("Find products by name, brand, category, or ingredient. Barcode scanning is still available in the Scan tab.")
         OutlinedTextField(
             value = query,
-            onValueChange = { query = it },
+            onValueChange = {
+                query = it
+                results = emptyList()
+                searched = false
+                error = null
+            },
             label = { Text("Product, brand, or ingredient") },
             leadingIcon = { Icon(Icons.Default.Search, null) },
             singleLine = true,
@@ -119,7 +126,7 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
                         Text("Score ${score.overallScore} / ${score.grade.label}")
                         ConfidenceBadge(score.confidenceLevel)
                     }
-                    Text(product.source.name)
+                    Text(product.source.displayName())
                 }
                 Button(
                     onClick = {
@@ -135,4 +142,12 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
             }
         }
     }
+}
+
+private fun ProductSource.displayName(): String = when (this) {
+    ProductSource.OpenFoodFacts -> "Open Food Facts"
+    ProductSource.OpenBeautyFacts -> "Open Beauty Facts"
+    ProductSource.Mock -> "Mock data"
+    ProductSource.UserEntered -> "User-entered"
+    ProductSource.Ocr -> "Label scan"
 }

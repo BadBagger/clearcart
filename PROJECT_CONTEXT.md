@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.3`
+- Latest APK release: `v0.1.4`
 
 ## Current State
 
@@ -64,12 +64,12 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## Latest Release
 
-- Tag: `v0.1.3`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.3`
+- Tag: `v0.1.4`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.4`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-debug-v0.1.3.apk`
-- Release notes: Adds the read-only Smithware Central summary provider for local scan history status, favorite count, average score, limited-confidence count, and recent product names. Build and unit tests passed.
+  - `ClearCart-debug-v0.1.4.apk`
+- Release notes: Fixes search screen stale result/no-result state after query edits, adds keyboard-aware padding, and improves product source labels. Build and unit tests passed.
 
 ## Important Constraints
 
