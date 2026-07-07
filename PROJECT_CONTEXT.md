@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.2`
+- Latest APK release: `v0.1.3`
 
 ## Current State
 
@@ -34,6 +34,9 @@ The app currently includes:
 - Privacy screen
 - Settings screen with future feature flags
 - Focused unit tests for scoring, preferences, and confidence logic
+- `ClearCartSummaryProvider` exposes a read-only Smithware Central summary at
+  `content://com.clearcart.app.summary/summary` with scan count, favorites,
+  average score, lower-confidence count, and recent product names only.
 
 ## Verified Build
 
@@ -61,12 +64,12 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## Latest Release
 
-- Tag: `v0.1.2`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.2`
+- Tag: `v0.1.3`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.3`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-debug-v0.1.2.apk`
-- Release notes: Adds a dedicated product search screen, text search provider support for Open Food Facts and Open Beauty Facts, and mock search fallback. Build and unit tests passed.
+  - `ClearCart-debug-v0.1.3.apk`
+- Release notes: Adds the read-only Smithware Central summary provider for local scan history status, favorite count, average score, limited-confidence count, and recent product names. Build and unit tests passed.
 
 ## Important Constraints
 

@@ -27,4 +27,19 @@ interface ScanDao {
 
     @Query("DELETE FROM scans")
     suspend fun clear()
+
+    @Query("SELECT COUNT(*) FROM scans")
+    suspend fun scanCount(): Int
+
+    @Query("SELECT COUNT(*) FROM scans WHERE favorite = 1")
+    suspend fun favoriteCount(): Int
+
+    @Query("SELECT AVG(score) FROM scans")
+    suspend fun averageScore(): Double?
+
+    @Query("SELECT productName FROM scans ORDER BY dateScanned DESC LIMIT 3")
+    suspend fun latestProductNames(): List<String>
+
+    @Query("SELECT COUNT(*) FROM scans WHERE dataConfidence != 'High'")
+    suspend fun lowerConfidenceCount(): Int
 }

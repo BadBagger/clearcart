@@ -10,6 +10,10 @@
         android:label="ClearCart"
         android:supportsRtl="true"
         android:theme="@style/Theme.ClearCart">
+        <provider
+            android:name=".ClearCartSummaryProvider"
+            android:authorities="com.clearcart.app.summary"
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
