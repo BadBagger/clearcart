@@ -62,6 +62,14 @@ Output APK:
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
+Release signing is configured through an ignored local `keystore.properties`
+file using the release keystore under the user's Smithware signing folder.
+Release APK output:
+
+```text
+app/build/outputs/apk/release/app-release.apk
+```
+
 ## Latest Release
 
 - Tag: `v0.1.4`
@@ -110,11 +118,11 @@ DevHub detects updates from GitHub Releases with APK assets attached. Source-onl
 - Open Beauty Facts support now has a separate Retrofit provider structure, but needs broader real-world validation against cosmetics barcodes.
 - Alternatives currently use mock/cached product data only.
 - Compare screen now uses full cached product snapshots where available and lets users select the two scanned products to compare.
-- Release signing is not configured; the current release uses the debug APK.
+- Release signing is configured locally; the current published GitHub Release still predates the signed release APK.
 
 ## Suggested Next Steps
 
-1. Add a release signing config and produce a signed release APK.
+1. Publish the next ClearCart GitHub Release with the signed release APK.
 2. Add ClearCart to the DevHub registry/listing after deciding icon and preview assets.
 3. Validate Open Beauty Facts lookup against real cosmetics/personal-care barcodes.
 4. Wire live OCR camera capture with ML Kit Text Recognition.

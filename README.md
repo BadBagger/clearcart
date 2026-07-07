@@ -50,6 +50,14 @@ Debug APK output:
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
+Release signing uses a local-only `keystore.properties` file based on
+`keystore.properties.example`. The real keystore and passwords must stay out of
+git. Release APK output:
+
+```text
+app/build/outputs/apk/release/app-release.apk
+```
+
 ## Mock Test Barcodes
 
 ```text
@@ -75,8 +83,7 @@ When publishing an app update:
 - Live camera OCR capture is not wired yet.
 - Open Beauty Facts provider needs validation against real cosmetics and personal-care barcodes.
 - Alternatives currently use mock/cached product data.
-- Release signing is not configured.
-- Latest GitHub Release uses the debug APK while release signing remains TODO.
+- Release signing is configured locally; the current published GitHub Release still predates the signed release APK.
 
 ## Coordination
 

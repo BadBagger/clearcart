@@ -1,7 +1,28 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
+}
+
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val releaseBuildRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("Release", ignoreCase = true) ||
+        taskName.endsWith(":assemble", ignoreCase = true) ||
+        taskName == "assemble" ||
+        taskName.endsWith(":build", ignoreCase = true) ||
+        taskName == "build"
+}
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use(::load)
+    } else if (releaseBuildRequested) {
+        throw GradleException(
+            "Release signing requires a local keystore.properties file. " +
+                "Copy keystore.properties.example and point it at the local release keystore."
+        )
+    }
 }
 
 android {
@@ -14,6 +35,34 @@ android {
         targetSdk = 36
         versionCode = 5
         versionName = "0.1.4"
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                val requiredKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+                val missingKeys = requiredKeys.filter { keystoreProperties.getProperty(it).isNullOrBlank() }
+                if (missingKeys.isNotEmpty()) {
+                    throw GradleException(
+                        "keystore.properties is missing required release signing fields: " +
+                            missingKeys.joinToString()
+                    )
+                }
+
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
     }
 
     compileOptions {
