@@ -83,7 +83,7 @@ When publishing an app update:
 - Live camera OCR capture is not wired yet.
 - Open Beauty Facts provider needs validation against real cosmetics and personal-care barcodes.
 - Alternatives currently use mock/cached product data.
-- Release signing is configured locally; the current published GitHub Release still predates the signed release APK.
+- Release signing is configured locally; `v0.1.5` is the first release published with the Smithware release key.
 
 ## Coordination
 

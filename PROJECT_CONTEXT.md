@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.4`
+- Latest APK release: `v0.1.5`
 
 ## Current State
 
@@ -72,12 +72,12 @@ app/build/outputs/apk/release/app-release.apk
 
 ## Latest Release
 
-- Tag: `v0.1.4`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.4`
+- Tag: `v0.1.5`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.5`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-debug-v0.1.4.apk`
-- Release notes: Fixes search screen stale result/no-result state after query edits, adds keyboard-aware padding, and improves product source labels. Build and unit tests passed.
+  - `ClearCart-release-v0.1.5.apk`
+- Release notes: Publishes ClearCart with a real local Smithware release signing key for outside-Google-Play distribution. Build, unit tests, and APK signature verification passed.
 
 ## Important Constraints
 
@@ -118,16 +118,15 @@ DevHub detects updates from GitHub Releases with APK assets attached. Source-onl
 - Open Beauty Facts support now has a separate Retrofit provider structure, but needs broader real-world validation against cosmetics barcodes.
 - Alternatives currently use mock/cached product data only.
 - Compare screen now uses full cached product snapshots where available and lets users select the two scanned products to compare.
-- Release signing is configured locally; the current published GitHub Release still predates the signed release APK.
+- Release signing is configured locally, and `v0.1.5` is the first release published with the Smithware release key.
 
 ## Suggested Next Steps
 
-1. Publish the next ClearCart GitHub Release with the signed release APK.
-2. Add ClearCart to the DevHub registry/listing after deciding icon and preview assets.
-3. Validate Open Beauty Facts lookup against real cosmetics/personal-care barcodes.
-4. Wire live OCR camera capture with ML Kit Text Recognition.
-5. Expand tests around provider fallback, Room snapshot persistence, and comparison tradeoff logic.
-6. Add data attribution UI for Open Food Facts and Open Beauty Facts.
+1. Add ClearCart to the DevHub registry/listing after deciding icon and preview assets.
+2. Validate Open Beauty Facts lookup against real cosmetics/personal-care barcodes.
+3. Wire live OCR camera capture with ML Kit Text Recognition.
+4. Expand tests around provider fallback, Room snapshot persistence, and comparison tradeoff logic.
+5. Add data attribution UI for Open Food Facts and Open Beauty Facts.
 
 ## Coordination Pattern
 
