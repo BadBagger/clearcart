@@ -143,6 +143,11 @@ class ProductRepository(
         }
     }
 
+    fun observeCategoryCandidates(): Flow<List<Product>> = scanDao.observeAll().map { rows ->
+        (rows.map { productFromEntity(it) } + MockProducts.all())
+            .distinctBy { product -> product.barcode.ifBlank { product.id } }
+    }
+
     private fun productFromEntity(entity: ScanEntity): Product {
         entity.productJson?.let { snapshot ->
             runCatching { gson.fromJson(snapshot, Product::class.java) }

@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.6`
+- Latest APK release: `v0.1.7`
 
 ## Current State
 
@@ -15,6 +15,8 @@ The app currently includes:
 - Home dashboard
 - Barcode scanner screen with CameraX and ML Kit Barcode Scanning
 - Dedicated product search screen for name, brand, category, or ingredient lookup
+- Product search result cards with product thumbnails when source images are available
+- Best by Category screen for top ClearCart-rated options from scanned, searched, cached, and sample products
 - Manual barcode entry
 - Normalized Product model with id, barcode, quantity/serving size, productType, dataSource, dataCompletenessScore, lastUpdated, and userEdited metadata
 - Barcode lookup uses cached local product snapshots immediately before refreshing from API providers when possible
@@ -45,6 +47,8 @@ The app currently includes:
 - Scoring tests for preference-separated personal fit, limited-data confidence behavior, and calm/non-fearmongering wording
 - Personal Fit tests for lower-sugar/higher-protein matches, fragrance conflicts, and brand/category avoid lists
 - Alternative suggestion tests for lower-sugar drinks, fragrance-free hair care, and weak-data rejection
+- Category-best ranking tests for protein shakes and weak-data filtering
+- Alcoholic beverage scoring regression coverage so beer is reviewed with alcohol context instead of treated like an ordinary low-sugar drink
 - Repository regression coverage for reopening locally saved products when providers miss
 - Product data quality tests for complete, missing-nutrition, manual, and OCR-reviewed products
 - `ClearCartSummaryProvider` exposes a read-only Smithware Central summary at
@@ -85,12 +89,12 @@ app/build/outputs/apk/release/app-release.apk
 
 ## Latest Release
 
-- Tag: `v0.1.6`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.6`
+- Tag: `v0.1.7`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.7`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-release-v0.1.6.apk`
-- Release notes: Publishes explainable scoring, DataStore-backed preferences, plain-language ingredient controls, normalized product data improvements, and stronger alternative recommendations. Build, unit tests, release build, and APK signature verification passed.
+  - `ClearCart-release-v0.1.7.apk`
+- Release notes: Adds product thumbnails to search results, introduces Best by Category rankings including protein shakes, and adjusts alcoholic beverage scoring so beer is reviewed with alcohol context instead of treated like an ordinary low-sugar drink. Build, unit tests, release build, and APK signature verification passed.
 
 ## Important Constraints
 

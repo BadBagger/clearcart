@@ -153,6 +153,37 @@ class ScoringEngineTest {
     }
 
     @Test
+    fun alcoholicBeveragesAreNotScoredLikeOrdinaryLowSugarDrinks() {
+        val product = foodProduct(
+            nutrition = Nutrition(
+                energyKcal100g = 42.0,
+                sugar100g = 0.0,
+                sodium100g = 0.0,
+                saturatedFat100g = 0.0,
+                fiber100g = 0.0,
+                protein100g = 0.4,
+            ),
+        ).copy(
+            name = "Heineken",
+            brand = "Heineken",
+            category = "beverages and beverages preparations",
+            ingredientsText = "Water, malted barley, hops.",
+            quantity = "330 ml",
+            servingSize = "330 ml",
+            rawResponse = "categories_tags=[en:beers,en:lagers,en:alcoholic-beverages]",
+            nutriScore = null,
+        )
+
+        val score = engine.score(product, UserPreferences())
+
+        assertTrue(score.overallScore < 70)
+        assertTrue(score.personalFitScore < 70)
+        assertTrue(score.scoreBreakdown.any { it.name == "Alcohol context" && it.score == 20 })
+        assertTrue(score.cautionList.any { it.text == "Alcoholic beverage" })
+        assertTrue(score.positiveList.none { it.text.contains("Lower sugar", ignoreCase = true) })
+    }
+
+    @Test
     fun scoreOutputAvoidsFearmongeringTerms() {
         val product = foodProduct(
             nutrition = Nutrition(

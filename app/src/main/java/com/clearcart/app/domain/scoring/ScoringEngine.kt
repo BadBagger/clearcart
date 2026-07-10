@@ -22,6 +22,7 @@ class ScoringEngine(
         "additives" to 0.12,
         "ingredientSimplicity" to 0.14,
         "allergenPreferenceMatch" to 0.10,
+        "alcoholContext" to 0.35,
         "dataCompleteness" to 0.0,
     ),
     private val cosmeticWeights: Map<String, Double> = mapOf(
@@ -85,9 +86,18 @@ class ScoringEngine(
     private fun foodSubscores(product: Product, preferences: UserPreferences): List<ScoreSubscore> {
         val n = product.nutrition
         val conflicts = allergenConflicts(product, preferences)
-        return listOf(
-            ScoreSubscore("Nutrition balance", scoreNutri(product.nutriScore), "Based on public nutrition grade when available."),
-            ScoreSubscore("Added sugar", thresholdScore(n?.sugar100g, 5.0, 12.0, true), "${formatGrams(n?.sugar100g)} per 100g."),
+        val alcoholic = isAlcoholicBeverage(product)
+        val scores = mutableListOf(
+            ScoreSubscore(
+                "Nutrition balance",
+                if (alcoholic) 45 else scoreNutri(product.nutriScore),
+                if (alcoholic) "Alcoholic drinks need extra context beyond standard nutrition scoring." else "Based on public nutrition grade when available.",
+            ),
+            ScoreSubscore(
+                "Added sugar",
+                thresholdScore(n?.sugar100g, 5.0, 12.0, true),
+                if (alcoholic) "${formatGrams(n?.sugar100g)} per 100g. Alcohol content is reviewed separately." else "${formatGrams(n?.sugar100g)} per 100g.",
+            ),
             ScoreSubscore("Sodium", thresholdScore(n?.sodium100g, 0.12, 0.5, true), "${formatGrams(n?.sodium100g)} per 100g."),
             ScoreSubscore("Saturated fat", thresholdScore(n?.saturatedFat100g, 1.5, 5.0, true), "${formatGrams(n?.saturatedFat100g)} per 100g."),
             ScoreSubscore("Additives", (100 - product.additives.size * 12).coerceAtLeast(35), "${product.additives.size} additives listed."),
@@ -99,6 +109,14 @@ class ScoringEngine(
             ),
             ScoreSubscore("Data completeness", completeness(product), "Affects confidence more than the product score."),
         )
+        if (alcoholic) {
+            scores += ScoreSubscore(
+                "Alcohol context",
+                20,
+                "Alcoholic beverage. ClearCart treats this as worth reviewing, even when sugar or additives look low.",
+            )
+        }
+        return scores
     }
 
     private fun cosmeticSubscores(product: Product, preferences: UserPreferences): List<ScoreSubscore> {
@@ -137,6 +155,7 @@ class ScoringEngine(
     }
 
     private fun positiveNotes(product: Product): List<ScoreNote> = buildList {
+        if (isAlcoholicBeverage(product)) return@buildList
         product.nutrition?.let {
             it.fiber100g?.let { value ->
                 if (value >= 5) add(ScoreNote("Good fiber content", "${formatGrams(value)} fiber per 100g."))
@@ -154,6 +173,9 @@ class ScoringEngine(
     }
 
     private fun cautionNotes(product: Product, preferences: UserPreferences): List<ScoreNote> = buildList {
+        if (isAlcoholicBeverage(product)) {
+            add(ScoreNote("Alcoholic beverage", "ClearCart keeps alcohol as a review signal instead of scoring it like an ordinary low-sugar drink."))
+        }
         product.nutrition?.let {
             it.sugar100g?.let { value ->
                 if (value > 12) add(ScoreNote("Higher sugar", "${formatGrams(value)} sugar per 100g."))
@@ -308,6 +330,7 @@ class ScoringEngine(
         if (allergenConflicts(product, preferences).isNotEmpty()) score -= 35
         if (preferences.brandAvoidList.any { product.brand.contains(it, ignoreCase = true) }) score -= 25
         if (preferences.categoryAvoidList.any { product.category.contains(it, ignoreCase = true) }) score -= 20
+        if (isAlcoholicBeverage(product)) score = score.coerceAtMost(68)
         return score.coerceIn(0, 100)
     }
 
@@ -333,6 +356,7 @@ class ScoringEngine(
         .replace("saturated fat", "saturatedFat")
         .replace("ingredient simplicity", "ingredientSimplicity")
         .replace("allergen/preference match", "allergenPreferenceMatch")
+        .replace("alcohol context", "alcoholContext")
         .replace("ingredient clarity", "ingredientClarity")
         .replace("fragrance/parfum flag", "fragranceFlag")
         .replace("fragrance flag", "fragranceFlag")
@@ -413,6 +437,18 @@ class ScoringEngine(
     private fun containsAny(text: String, terms: List<String>): Boolean =
         terms.any { text.contains(it, ignoreCase = true) }
 
+    private fun isAlcoholicBeverage(product: Product): Boolean {
+        val searchableText = listOf(product.name, product.brand, product.category)
+            .plus(product.labels)
+            .plus(product.ingredientsText)
+            .plus(product.rawResponse.orEmpty())
+            .joinToString(" ")
+            .lowercase()
+        return alcoholTerms.any { term ->
+            Regex("\\b${Regex.escape(term)}\\b").containsMatchIn(searchableText)
+        }
+    }
+
     private fun gradeFor(score: Int) = when {
         score >= 86 -> Grade.Excellent
         score >= 72 -> Grade.Good
@@ -429,6 +465,36 @@ class ScoringEngine(
 
 private val meatTerms = listOf("beef", "pork", "chicken", "turkey", "fish", "gelatin", "lard")
 private val animalIngredientTerms = meatTerms + listOf("milk", "egg", "honey", "whey", "casein", "butter", "cream")
+private val alcoholTerms = listOf(
+    "alcoholic beverage",
+    "alcoholic beverages",
+    "alcoholic drink",
+    "alcoholic drinks",
+    "beer",
+    "beers",
+    "lager",
+    "lagers",
+    "ale",
+    "ales",
+    "stout",
+    "stouts",
+    "porter",
+    "porters",
+    "wine",
+    "wines",
+    "cider",
+    "ciders",
+    "hard seltzer",
+    "hard seltzers",
+    "vodka",
+    "whiskey",
+    "whisky",
+    "rum",
+    "gin",
+    "tequila",
+    "liqueur",
+    "heineken",
+)
 
 fun ConfidenceLevel.display(): String = when (this) {
     ConfidenceLevel.High -> "High confidence"

@@ -1,6 +1,8 @@
 package com.clearcart.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,12 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -30,6 +35,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -39,6 +46,7 @@ import com.clearcart.app.data.model.ProductSource
 import com.clearcart.app.data.repository.AppContainer
 import com.clearcart.app.ui.components.ConfidenceBadge
 import com.clearcart.app.ui.components.SectionCard
+import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -119,14 +127,35 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
         results.forEach { product ->
             val score = container.scoringEngine.score(product, preferences)
             SectionCard {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    ProductSearchThumbnail(product)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(product.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        Text(listOf(product.brand, product.category).filter { it.isNotBlank() }.joinToString(" / ").ifBlank { "Details limited" })
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.Top,
+                        ) {
+                            Text(
+                                product.name,
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(product.source.displayName(), style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Text(
+                            listOf(product.brand, product.category)
+                                .filter { it.isNotBlank() }
+                                .joinToString(" / ")
+                                .ifBlank { "Details limited" },
+                        )
                         Text("Score ${score.overallScore} / ${score.scoreLabel.label}")
                         ConfidenceBadge(score.confidenceLevel)
                     }
-                    Text(product.source.displayName())
                 }
                 Button(
                     onClick = {
@@ -140,6 +169,34 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
                     Text("Open Result")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ProductSearchThumbnail(product: Product) {
+    val shape = RoundedCornerShape(12.dp)
+    Box(
+        modifier = Modifier
+            .size(72.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (product.imageUrl.isNullOrBlank()) {
+            Icon(
+                imageVector = Icons.Default.ShoppingBag,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(30.dp),
+            )
+        } else {
+            AsyncImage(
+                model = product.imageUrl,
+                contentDescription = product.name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
         }
     }
 }

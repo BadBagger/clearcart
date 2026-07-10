@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CompareArrows
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PrivacyTip
@@ -55,6 +56,11 @@ fun HomeScreen(container: AppContainer, navController: NavController) {
             Icon(Icons.Default.Search, null)
             Spacer(Modifier.padding(6.dp))
             Text("Search Products")
+        }
+        OutlinedButton(onClick = { navController.navigate("best-categories") }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Icon(Icons.Default.EmojiEvents, null)
+            Spacer(Modifier.padding(6.dp))
+            Text("Best by Category")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ElevatedButton(onClick = { navController.navigate("compare") }, modifier = Modifier.weight(1f)) {
