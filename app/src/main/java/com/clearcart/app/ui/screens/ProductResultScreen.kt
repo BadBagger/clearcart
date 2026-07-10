@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,6 +36,7 @@ import com.clearcart.app.data.model.ProductDataQuality
 import com.clearcart.app.data.model.ProductDataQualityLabel
 import com.clearcart.app.data.model.ProductScore
 import com.clearcart.app.data.repository.AppContainer
+import com.clearcart.app.domain.ingredients.IngredientInsight
 import com.clearcart.app.ui.components.ScoreHeader
 import com.clearcart.app.ui.components.SectionCard
 import kotlinx.coroutines.launch
@@ -122,14 +124,51 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
             }
         }
         SectionCard {
-            Text("Ingredient notes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("Ingredients", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            if (p.ingredientsText.isBlank()) {
+                Text("Ingredient data is incomplete.")
+            } else {
+                Text(p.ingredientsText)
+            }
+            IngredientExplorer(
+                ingredients = remember(p, preferences) {
+                    container.ingredientInsightEngine.explainIngredients(p, preferences)
+                },
+                onAddAvoid = { ingredient ->
+                    container.preferencesRepository.update { current ->
+                        current.copy(
+                            ingredientAvoidList = current.ingredientAvoidList + ingredient,
+                            ingredientOkayList = current.ingredientOkayList - ingredient,
+                        )
+                    }
+                },
+                onAddOkay = { ingredient ->
+                    container.preferencesRepository.update { current ->
+                        current.copy(
+                            ingredientOkayList = current.ingredientOkayList + ingredient,
+                            ingredientAvoidList = current.ingredientAvoidList - ingredient,
+                        )
+                    }
+                },
+                onRemoveChoice = { ingredient ->
+                    container.preferencesRepository.update { current ->
+                        current.copy(
+                            ingredientAvoidList = current.ingredientAvoidList - ingredient,
+                            ingredientOkayList = current.ingredientOkayList - ingredient,
+                        )
+                    }
+                },
+            )
             val insights = remember(p, preferences) {
                 container.ingredientInsightEngine.explain(p, preferences)
             }
-            insights.forEach {
-                Text(it.title, fontWeight = FontWeight.Medium)
-                Text(it.detail, style = MaterialTheme.typography.bodySmall)
-                Text("Found: ${it.evidence}${if (it.isPreferenceBased) " Based on your preferences." else ""}")
+            if (insights.isNotEmpty()) {
+                Text("Ingredient notes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                insights.forEach {
+                    Text(it.title, fontWeight = FontWeight.Medium)
+                    Text(it.detail, style = MaterialTheme.typography.bodySmall)
+                    Text("Found: ${it.evidence}${if (it.isPreferenceBased) " Based on your preferences." else ""}")
+                }
             }
         }
         SectionCard {
@@ -170,6 +209,60 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
             }
         }
         Text("For medical dietary needs, check with a professional.")
+    }
+}
+
+@Composable
+private fun IngredientExplorer(
+    ingredients: List<IngredientInsight>,
+    onAddAvoid: (String) -> Unit,
+    onAddOkay: (String) -> Unit,
+    onRemoveChoice: (String) -> Unit,
+) {
+    var hideQuietIngredients by remember { mutableStateOf(false) }
+    var selectedName by remember(ingredients) { mutableStateOf(ingredients.firstOrNull { it.isHighlighted }?.ingredient) }
+    val visibleIngredients = if (hideQuietIngredients) ingredients.filter { it.isHighlighted } else ingredients
+    val selected = ingredients.firstOrNull { it.ingredient == selectedName }
+
+    if (ingredients.isEmpty()) {
+        Text("No readable ingredients were available to explain.", style = MaterialTheme.typography.bodySmall)
+        return
+    }
+
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text("Ingredient list", fontWeight = FontWeight.Medium)
+        Row {
+            Text("Hide quiet items", style = MaterialTheme.typography.bodySmall)
+            Checkbox(checked = hideQuietIngredients, onCheckedChange = { hideQuietIngredients = it })
+        }
+    }
+    visibleIngredients.forEach { ingredient ->
+        OutlinedButton(
+            onClick = { selectedName = ingredient.ingredient },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(Modifier.fillMaxWidth()) {
+                Text(ingredient.ingredient, fontWeight = FontWeight.Medium)
+                Text(ingredient.tags.joinToString { it.label }, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+    selected?.let {
+        Text("Explanation", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+        Text(it.ingredient, fontWeight = FontWeight.Medium)
+        Text(it.detail)
+        Text(it.evidence, style = MaterialTheme.typography.bodySmall)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { onAddAvoid(it.ingredient) }, modifier = Modifier.weight(1f)) {
+                Text("Avoid")
+            }
+            OutlinedButton(onClick = { onAddOkay(it.ingredient) }, modifier = Modifier.weight(1f)) {
+                Text("Okay")
+            }
+            Button(onClick = { onRemoveChoice(it.ingredient) }, modifier = Modifier.weight(1f)) {
+                Text("Clear")
+            }
+        }
     }
 }
 

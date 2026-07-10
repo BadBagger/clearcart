@@ -112,6 +112,8 @@ data class UserPreferences(
     val budgetConscious: Boolean = false,
     val simpleIngredients: Boolean = false,
     val preferOrganic: Boolean = false,
+    val ingredientAvoidList: Set<String> = emptySet(),
+    val ingredientOkayList: Set<String> = emptySet(),
     val scoringWeightOverrides: Map<String, Double> = emptyMap(),
 )
 

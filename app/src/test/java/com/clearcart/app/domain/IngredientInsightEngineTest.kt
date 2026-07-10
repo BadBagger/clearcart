@@ -6,6 +6,7 @@ import com.clearcart.app.data.model.Product
 import com.clearcart.app.data.model.ProductSource
 import com.clearcart.app.data.model.ProductType
 import com.clearcart.app.data.model.UserPreferences
+import com.clearcart.app.domain.ingredients.IngredientTag
 import com.clearcart.app.domain.ingredients.IngredientInsightEngine
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -24,6 +25,7 @@ class IngredientInsightEngineTest {
         val sugarInsight = insights.first { it.title.contains("sugar", ignoreCase = true) }
         assertTrue(sugarInsight.isPreferenceBased)
         assertTrue(sugarInsight.detail.contains("nutrition facts", ignoreCase = true))
+        assertTrue(sugarInsight.tags.contains(IngredientTag.Sweetener))
         assertNoMedicalClaimLanguage(insights.joinToString(" ") { "${it.title} ${it.detail}" })
     }
 
@@ -37,10 +39,43 @@ class IngredientInsightEngineTest {
             preferences = UserPreferences(avoidFragrance = true, sensitiveSkin = true),
         )
 
-        val fragranceInsight = insights.first { it.title.contains("fragrance", ignoreCase = true) }
+        val fragranceInsight = insights.first { it.tags.contains(IngredientTag.Fragrance) }
         assertTrue(fragranceInsight.isPreferenceBased)
-        assertTrue(fragranceInsight.detail.contains("sensitive-skin users", ignoreCase = true))
+        assertTrue(fragranceInsight.detail.contains("avoiding added fragrance", ignoreCase = true))
+        assertTrue(fragranceInsight.tags.contains(IngredientTag.Fragrance))
         assertNoMedicalClaimLanguage(insights.joinToString(" ") { "${it.title} ${it.detail}" })
+    }
+
+    @Test
+    fun perIngredientExplanationsIncludeTagsAndCalmPurpose() {
+        val insights = engine.explainIngredients(
+            product = product(ingredientsText = "Water, xanthan gum, potassium sorbate, caramel color."),
+            preferences = UserPreferences(),
+        )
+
+        assertTrue(insights.first { it.ingredient == "xanthan gum" }.tags.contains(IngredientTag.Thickener))
+        assertTrue(insights.first { it.ingredient == "potassium sorbate" }.tags.contains(IngredientTag.Preservative))
+        assertTrue(insights.first { it.ingredient == "caramel color" }.tags.contains(IngredientTag.Coloring))
+        assertTrue(insights.any { it.detail.contains("commonly used", ignoreCase = true) || it.detail.contains("often used", ignoreCase = true) })
+        assertNoMedicalClaimLanguage(insights.joinToString(" ") { "${it.title} ${it.detail}" })
+    }
+
+    @Test
+    fun userAvoidedAndOkayIngredientsAreTagged() {
+        val insights = engine.explainIngredients(
+            product = product(ingredientsText = "Water, cane sugar, sea salt."),
+            preferences = UserPreferences(
+                ingredientAvoidList = setOf("cane sugar"),
+                ingredientOkayList = setOf("sea salt"),
+            ),
+        )
+
+        val avoided = insights.first { it.ingredient == "cane sugar" }
+        val okay = insights.first { it.ingredient == "sea salt" }
+
+        assertTrue(avoided.tags.contains(IngredientTag.UserAvoided))
+        assertTrue(avoided.isPreferenceBased)
+        assertTrue(okay.tags.contains(IngredientTag.UserFavorite))
     }
 
     @Test

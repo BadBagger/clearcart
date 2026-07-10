@@ -13,8 +13,9 @@ It is inspired by the general product-scanner category, but it does not copy Yuk
 - Normalizes API, manual, OCR, mock, and cached products into one Product model with data source and completeness metadata.
 - Saves scan history locally with Room.
 - Shows a calm ClearCart Score, Personal Fit score, confidence score, top reasons, and explainable breakdown.
-- Explains ingredient notes in plain language without medical claims or scare wording.
+- Shows the full ingredient list, highlights ingredients worth reviewing, and explains ingredient tags in plain language without medical claims or scare wording.
 - Lets users set preferences such as allergens, low sugar, low sodium, fragrance avoidance, and simpler ingredient lists.
+- Lets users add ingredients to a local avoid list or okay list from product results.
 - Supports manual product entry when barcode data is missing.
 - Includes a basic OCR label fallback screen that can hand parsed name and ingredient text into manual entry.
 - Reopens saved local products from history/manual entry even when external providers miss.

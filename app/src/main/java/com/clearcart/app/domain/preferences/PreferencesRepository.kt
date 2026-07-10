@@ -28,6 +28,8 @@ class PreferencesRepository(context: Context) {
             .putBoolean("budgetConscious", next.budgetConscious)
             .putBoolean("simpleIngredients", next.simpleIngredients)
             .putBoolean("preferOrganic", next.preferOrganic)
+            .putStringSet("ingredientAvoidList", next.ingredientAvoidList)
+            .putStringSet("ingredientOkayList", next.ingredientOkayList)
             .apply()
         _state.value = next
     }
@@ -47,5 +49,7 @@ class PreferencesRepository(context: Context) {
         budgetConscious = prefs.getBoolean("budgetConscious", false),
         simpleIngredients = prefs.getBoolean("simpleIngredients", false),
         preferOrganic = prefs.getBoolean("preferOrganic", false),
+        ingredientAvoidList = prefs.getStringSet("ingredientAvoidList", emptySet()) ?: emptySet(),
+        ingredientOkayList = prefs.getStringSet("ingredientOkayList", emptySet()) ?: emptySet(),
     )
 }

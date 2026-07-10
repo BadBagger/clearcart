@@ -29,6 +29,8 @@ import com.clearcart.app.data.repository.AppContainer
 fun PreferencesScreen(container: AppContainer, navController: NavController) {
     val preferences by container.preferencesRepository.state.collectAsState()
     var allergenText by remember(preferences.allergensToAvoid) { mutableStateOf(preferences.allergensToAvoid.joinToString(", ")) }
+    var ingredientAvoidText by remember(preferences.ingredientAvoidList) { mutableStateOf(preferences.ingredientAvoidList.joinToString(", ")) }
+    var ingredientOkayText by remember(preferences.ingredientOkayList) { mutableStateOf(preferences.ingredientOkayList.joinToString(", ")) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("My Preferences", style = MaterialTheme.typography.headlineMedium)
         Text("These affect warnings and suggestions, but raw facts remain visible.")
@@ -39,6 +41,24 @@ fun PreferencesScreen(container: AppContainer, navController: NavController) {
                 container.preferencesRepository.update { p -> p.copy(allergensToAvoid = it.split(',').map { value -> value.trim() }.filter { value -> value.isNotBlank() }.toSet()) }
             },
             label = { Text("Allergens to avoid") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            ingredientAvoidText,
+            {
+                ingredientAvoidText = it
+                container.preferencesRepository.update { p -> p.copy(ingredientAvoidList = it.toPreferenceSet()) }
+            },
+            label = { Text("Ingredients to avoid") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            ingredientOkayText,
+            {
+                ingredientOkayText = it
+                container.preferencesRepository.update { p -> p.copy(ingredientOkayList = it.toPreferenceSet()) }
+            },
+            label = { Text("Ingredients marked okay") },
             modifier = Modifier.fillMaxWidth(),
         )
         PreferenceToggle("Vegan", preferences.vegan) { container.preferencesRepository.update { p -> p.copy(vegan = it) } }
@@ -56,6 +76,12 @@ fun PreferencesScreen(container: AppContainer, navController: NavController) {
         PreferenceToggle("Prefer organic", preferences.preferOrganic) { container.preferencesRepository.update { p -> p.copy(preferOrganic = it) } }
     }
 }
+
+private fun String.toPreferenceSet(): Set<String> =
+    split(',')
+        .map { value -> value.trim() }
+        .filter { value -> value.isNotBlank() }
+        .toSet()
 
 @Composable
 private fun PreferenceToggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {

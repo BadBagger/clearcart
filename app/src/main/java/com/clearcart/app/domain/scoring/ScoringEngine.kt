@@ -220,6 +220,11 @@ class ScoringEngine(
         if (preferences.avoidArtificialColors && text.contains("color")) {
             add(ScoreNote("Flagged based on your color additive preference", "Ingredient text includes color wording.", true))
         }
+        preferences.ingredientAvoidList
+            .filter { avoided -> text.contains(avoided, ignoreCase = true) }
+            .forEach { avoided ->
+                add(ScoreNote("Flagged based on your ingredient preference", "$avoided appears in the ingredient text.", true))
+            }
     }
 
     private fun missingDataWarnings(product: Product): List<ScoreNote> {
@@ -327,6 +332,9 @@ class ScoringEngine(
         if (preferences.dairyFree && ("milk" in product.allergens.map { it.lowercase() } || text.contains("milk"))) score -= 35
         if (preferences.avoidArtificialColors && text.contains("color")) score -= 15
         if ((preferences.avoidFragrance || preferences.sensitiveSkin) && hasFragrance(product)) score -= 25
+        preferences.ingredientAvoidList.forEach { avoided ->
+            if (text.contains(avoided, ignoreCase = true)) score -= 20
+        }
         return score.coerceIn(20, 100)
     }
 
