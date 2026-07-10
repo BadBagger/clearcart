@@ -33,16 +33,47 @@ fun SectionCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
 
 @Composable
 fun ScoreHeader(score: ProductScore) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column {
-            Text("${score.overallScore}", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
-            Text(score.grade.label, style = MaterialTheme.typography.titleMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            ScoreMetric(
+                label = "ClearCart Score",
+                value = score.overallScore.toString(),
+                detail = score.scoreLabel.label,
+            )
+            ScoreMetric(
+                label = "Personal Fit",
+                value = score.personalFitScore.toString(),
+                detail = score.personalFitLabel.label,
+                alignEnd = true,
+            )
         }
-        ConfidenceBadge(score.confidenceLevel)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Confidence", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Column(horizontalAlignment = Alignment.End) {
+                Text("${score.confidenceScore}/100", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                ConfidenceBadge(score.confidenceLevel)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScoreMetric(label: String, value: String, detail: String, alignEnd: Boolean = false) {
+    Column(horizontalAlignment = if (alignEnd) Alignment.End else Alignment.Start) {
+        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        Text(value, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
+        Text(detail, style = MaterialTheme.typography.titleMedium)
     }
 }
 

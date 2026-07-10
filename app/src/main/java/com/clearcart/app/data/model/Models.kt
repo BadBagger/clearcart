@@ -57,6 +57,16 @@ data class ProductScore(
     val explanationList: List<ScoreNote>,
     val positiveList: List<ScoreNote>,
     val cautionList: List<ScoreNote>,
+    val scoreLabel: ScoreLabel = ScoreLabel.Okay,
+    val confidenceScore: Int = 0,
+    val personalFitScore: Int = overallScore,
+    val personalFitLabel: ScoreLabel = scoreLabel,
+    val explanationSummary: String = "",
+    val scoreBreakdown: List<ScoreSubscore> = subscores,
+    val topReasons: List<ScoreNote> = emptyList(),
+    val preferenceMatches: List<ScoreNote> = emptyList(),
+    val preferenceConflicts: List<ScoreNote> = emptyList(),
+    val missingDataWarnings: List<ScoreNote> = emptyList(),
 )
 
 data class ScoreSubscore(
@@ -77,6 +87,14 @@ enum class Grade(val label: String) {
     Okay("Okay"),
     Caution("Caution"),
     AvoidOften("Avoid Often"),
+}
+
+enum class ScoreLabel(val label: String) {
+    GreatFit("Great fit"),
+    GoodOption("Good option"),
+    Okay("Okay"),
+    WorthReviewing("Worth reviewing"),
+    LimitedData("Limited data"),
 }
 
 data class UserPreferences(

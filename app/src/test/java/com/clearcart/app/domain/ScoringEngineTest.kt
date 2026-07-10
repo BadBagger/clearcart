@@ -4,6 +4,7 @@ import com.clearcart.app.data.model.ConfidenceLevel
 import com.clearcart.app.data.model.Nutrition
 import com.clearcart.app.data.model.Product
 import com.clearcart.app.data.model.ProductSource
+import com.clearcart.app.data.model.ScoreLabel
 import com.clearcart.app.data.model.UserPreferences
 import com.clearcart.app.domain.confidence.ConfidenceEngine
 import com.clearcart.app.domain.scoring.ScoringEngine
@@ -30,7 +31,29 @@ class ScoringEngineTest {
         val score = engine.score(product, UserPreferences(lowSugar = true))
 
         assertTrue(score.cautionList.any { it.text.contains("low sugar preference", ignoreCase = true) })
-        assertTrue(score.subscores.any { it.name == "Sugar" && it.detail.contains("18 g") })
+        assertTrue(score.subscores.any { it.name == "Added sugar" && it.detail.contains("18 g") })
+        assertTrue(score.scoreBreakdown.any { it.name == "Added sugar" && it.detail.contains("18 g") })
+    }
+
+    @Test
+    fun preferencesChangePersonalFitWithoutChangingGeneralScore() {
+        val product = foodProduct(
+            nutrition = Nutrition(
+                energyKcal100g = 410.0,
+                sugar100g = 18.0,
+                sodium100g = 0.22,
+                saturatedFat100g = 1.0,
+                fiber100g = 6.0,
+                protein100g = 8.0,
+            ),
+        )
+
+        val general = engine.score(product, UserPreferences())
+        val lowSugarFit = engine.score(product, UserPreferences(lowSugar = true))
+
+        assertEquals(general.overallScore, lowSugarFit.overallScore)
+        assertTrue(lowSugarFit.personalFitScore < general.personalFitScore)
+        assertTrue(lowSugarFit.preferenceConflicts.any { it.text.contains("low sugar", ignoreCase = true) || it.text.contains("preference", ignoreCase = true) })
     }
 
     @Test
@@ -59,8 +82,49 @@ class ScoringEngineTest {
 
         val score = engine.score(product, UserPreferences())
 
-        assertTrue(score.positiveList.none { it.text.contains("Low saturated fat", ignoreCase = true) })
+        assertTrue(score.positiveList.none { it.text.contains("saturated fat", ignoreCase = true) })
         assertTrue(score.subscores.any { it.name == "Saturated fat" && it.detail == "Missing per 100g." })
+    }
+
+    @Test
+    fun missingDataLowersConfidenceButDoesNotAutomaticallyPunishOverall() {
+        val product = foodProduct(
+            nutrition = null,
+            lastUpdated = null,
+        ).copy(ingredientsText = "")
+
+        val score = engine.score(product, UserPreferences())
+
+        assertEquals(ScoreLabel.LimitedData, score.scoreLabel)
+        assertTrue(score.confidenceScore < 40)
+        assertTrue(score.overallScore >= 50)
+        assertTrue(score.missingDataWarnings.any { it.text == "Data incomplete" })
+    }
+
+    @Test
+    fun scoreOutputAvoidsFearmongeringTerms() {
+        val product = foodProduct(
+            nutrition = Nutrition(
+                energyKcal100g = 410.0,
+                sugar100g = 18.0,
+                sodium100g = 0.8,
+                saturatedFat100g = 6.0,
+                fiber100g = 1.0,
+                protein100g = 2.0,
+            ),
+        )
+
+        val score = engine.score(product, UserPreferences(lowSugar = true, lowSodium = true))
+        val text = (
+            listOf(score.explanationSummary) +
+                score.topReasons.map { "${it.text} ${it.evidence}" } +
+                score.cautionList.map { "${it.text} ${it.evidence}" }
+            ).joinToString(" ")
+
+        assertTrue(!text.contains("toxic", ignoreCase = true))
+        assertTrue(!text.contains("dangerous", ignoreCase = true))
+        assertTrue(!text.contains("poison", ignoreCase = true))
+        assertTrue(!text.contains("will prevent disease", ignoreCase = true))
     }
 
     @Test

@@ -83,7 +83,7 @@ fun CompareScreen(container: AppContainer, navController: NavController) {
             scored.forEach { (product, score) ->
                 SectionCard(Modifier.weight(1f)) {
                     Text(product.name, fontWeight = FontWeight.SemiBold)
-                    Text("Score ${score.overallScore} • ${score.grade.label}")
+                    Text("Score ${score.overallScore} • ${score.scoreLabel.label}")
                     Text(product.brand.ifBlank { "Brand not listed" })
                     Text("Category: ${product.category.ifBlank { "Not listed" }}")
                     Text("Confidence: ${score.confidenceLevel.display()}")

@@ -83,6 +83,10 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
         p.imageUrl?.let { AsyncImage(model = it, contentDescription = p.name, modifier = Modifier.fillMaxWidth()) }
         SectionCard { ScoreHeader(s) }
         SectionCard {
+            Text("Score summary", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(s.explanationSummary)
+        }
+        SectionCard {
             val qualityLabel = ProductDataQuality.qualityLabel(p)
             Text("Data quality", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text("${qualityLabel.label} / ${p.dataCompletenessScore}% complete")
@@ -91,6 +95,25 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
                 Text(ProductDataQuality.missingDataCopy(p), style = MaterialTheme.typography.bodySmall)
             }
             Text("Source: ${p.dataSource.displayName()}", style = MaterialTheme.typography.bodySmall)
+        }
+        SectionCard {
+            Text("Top reasons", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            s.topReasons.ifEmpty { s.explanationList }.forEach {
+                Text("- ${it.text}\n${it.evidence}${if (it.isPreferenceBased) " This reflects your preferences." else ""}")
+            }
+        }
+        if (s.preferenceMatches.isNotEmpty() || s.preferenceConflicts.isNotEmpty()) {
+            SectionCard {
+                Text("Personal fit", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                s.preferenceMatches.forEach {
+                    Text("Match: ${it.text}", fontWeight = FontWeight.Medium)
+                    Text(it.evidence, style = MaterialTheme.typography.bodySmall)
+                }
+                s.preferenceConflicts.forEach {
+                    Text("Worth checking: ${it.text}", fontWeight = FontWeight.Medium)
+                    Text(it.evidence, style = MaterialTheme.typography.bodySmall)
+                }
+            }
         }
         SectionCard {
             Text("Why this score?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -111,7 +134,7 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
         }
         SectionCard {
             Text("Score breakdown", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            s.subscores.forEach {
+            s.scoreBreakdown.forEach {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Column(Modifier.weight(1f)) {
                         Text(it.name, fontWeight = FontWeight.Medium)

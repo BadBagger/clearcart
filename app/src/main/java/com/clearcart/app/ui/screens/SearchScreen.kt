@@ -123,7 +123,7 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(product.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text(listOf(product.brand, product.category).filter { it.isNotBlank() }.joinToString(" / ").ifBlank { "Details limited" })
-                        Text("Score ${score.overallScore} / ${score.grade.label}")
+                        Text("Score ${score.overallScore} / ${score.scoreLabel.label}")
                         ConfidenceBadge(score.confidenceLevel)
                     }
                     Text(product.source.displayName())
