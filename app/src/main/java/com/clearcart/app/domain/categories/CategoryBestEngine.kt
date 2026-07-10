@@ -4,13 +4,13 @@ import com.clearcart.app.data.model.ConfidenceLevel
 import com.clearcart.app.data.model.Product
 import com.clearcart.app.data.model.ProductScore
 import com.clearcart.app.data.model.UserPreferences
+import com.clearcart.app.domain.preferences.ProductPreferenceFilter
 import com.clearcart.app.domain.scoring.ScoringEngine
 
 data class CategoryPick(
     val categoryName: String,
     val product: Product,
     val score: ProductScore,
-    val whyPicked: String,
 )
 
 class CategoryBestEngine(
@@ -22,27 +22,49 @@ class CategoryBestEngine(
         categories: List<String> = defaultCategories,
     ): List<CategoryPick> {
         return categories.mapNotNull { category ->
-            val candidates = products
-                .filter { product -> product.matchesCategory(category) }
-                .distinctBy { it.barcode.ifBlank { it.id } }
-                .map { product -> product to scoringEngine.score(product, preferences) }
-                .filter { (_, score) -> score.confidenceScore >= 45 }
-
-            val best = candidates.maxWithOrNull(
-                compareBy<Pair<Product, ProductScore>> { it.second.overallScore }
-                    .thenBy { it.second.personalFitScore }
-                    .thenBy { it.first.confidenceLevel.rank() }
-                    .thenBy { it.first.dataCompletenessScore }
-            ) ?: return@mapNotNull null
-
-            CategoryPick(
-                categoryName = category,
-                product = best.first,
-                score = best.second,
-                whyPicked = whyPicked(best.first, best.second),
-            )
+            rankedProductsForCategory(category, products, preferences).firstOrNull()
         }
     }
+
+    fun rankedProductsForCategory(
+        category: String,
+        products: List<Product>,
+        preferences: UserPreferences,
+        limit: Int = 20,
+    ): List<CategoryPick> {
+        return products
+            .filter { product -> product.matchesCategory(category) }
+            .filter { product -> ProductPreferenceFilter.visibleInRecommendationLists(product, preferences) }
+            .distinctBy { it.barcode.ifBlank { it.id } }
+            .map { product -> product to scoringEngine.score(product, preferences) }
+            .filter { (_, score) -> score.confidenceScore >= 45 }
+            .sortedWith(
+                compareByDescending<Pair<Product, ProductScore>> { it.second.overallScore }
+                    .thenByDescending { it.second.personalFitScore }
+                    .thenByDescending { it.first.confidenceLevel.rank() }
+                    .thenByDescending { it.first.dataCompletenessScore }
+            )
+            .take(limit)
+            .map { (product, score) ->
+                CategoryPick(
+                    categoryName = category,
+                    product = product,
+                    score = score,
+                )
+            }
+    }
+
+    fun hasCategoryMatch(category: String, products: List<Product>): Boolean =
+        products.any { it.matchesCategory(category) }
+
+    fun hiddenByPreferenceCount(
+        category: String,
+        products: List<Product>,
+        preferences: UserPreferences,
+    ): Int =
+        products
+            .filter { it.matchesCategory(category) }
+            .count { !ProductPreferenceFilter.visibleInRecommendationLists(it, preferences) }
 
     private fun Product.matchesCategory(category: String): Boolean {
         val normalizedCategory = category.lowercase()
@@ -52,16 +74,6 @@ class CategoryBestEngine(
         return normalizedCategory.split(" ")
             .filter { it.length >= 3 }
             .any { searchable.contains(it) }
-    }
-
-    private fun whyPicked(product: Product, score: ProductScore): String {
-        val reasons = buildList {
-            add("highest ClearCart Score in this category set")
-            if (score.personalFitScore >= score.overallScore) add("strong Personal Fit")
-            if (product.dataCompletenessScore >= 80) add("good data completeness")
-            score.positiveList.firstOrNull()?.let { add(it.text.replaceFirstChar { char -> char.lowercase() }) }
-        }
-        return reasons.distinct().take(3).joinToString(", ").replaceFirstChar { it.uppercase() } + "."
     }
 
     private fun ConfidenceLevel.rank(): Int = when (this) {

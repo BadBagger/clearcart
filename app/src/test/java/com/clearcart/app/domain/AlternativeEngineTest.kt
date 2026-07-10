@@ -76,6 +76,41 @@ class AlternativeEngineTest {
         assertTrue(suggestions.none { it.product.barcode == "weak" })
     }
 
+    @Test
+    fun selectedAllergenAlternativesAreHidden() {
+        val current = drink(
+            barcode = "shake-current",
+            name = "Sweet Protein Shake",
+            sugar = 9.0,
+            ingredients = "Water, cane sugar, pea protein.",
+            additives = emptyList(),
+        ).copy(category = "protein shakes")
+        val milkAlternative = drink(
+            barcode = "shake-milk",
+            name = "Milk Protein Shake",
+            sugar = 1.0,
+            ingredients = "Water, milk protein, vanilla.",
+            additives = emptyList(),
+        ).copy(category = "protein shakes", allergens = listOf("milk"))
+        val peaAlternative = drink(
+            barcode = "shake-pea",
+            name = "Pea Protein Shake",
+            sugar = 2.0,
+            ingredients = "Water, pea protein, vanilla.",
+            additives = emptyList(),
+        ).copy(category = "protein shakes")
+
+        val suggestions = engine.suggestFor(
+            current,
+            UserPreferences(allergensToAvoid = setOf("milk"), lowSugar = true),
+            listOf(milkAlternative, peaAlternative),
+            includeMockFallback = false,
+        )
+
+        assertTrue(suggestions.none { it.product.barcode == "shake-milk" })
+        assertTrue(suggestions.any { it.product.barcode == "shake-pea" })
+    }
+
     private fun cereal(barcode: String, name: String, sugar: Double) = Product(
         barcode = barcode,
         name = name,

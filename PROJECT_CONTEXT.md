@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.7`
+- Latest APK release: `v0.1.8`
 
 ## Current State
 
@@ -16,7 +16,7 @@ The app currently includes:
 - Barcode scanner screen with CameraX and ML Kit Barcode Scanning
 - Dedicated product search screen for name, brand, category, or ingredient lookup
 - Product search result cards with product thumbnails when source images are available
-- Best by Category screen for top ClearCart-rated options from scanned, searched, cached, and sample products
+- Best by Category category browser with category-specific thumbnails and per-category ranked product lists
 - Manual barcode entry
 - Normalized Product model with id, barcode, quantity/serving size, productType, dataSource, dataCompletenessScore, lastUpdated, and userEdited metadata
 - Barcode lookup uses cached local product snapshots immediately before refreshing from API providers when possible
@@ -31,6 +31,7 @@ The app currently includes:
 - Explainable scoring output with separate ClearCart Score, Personal Fit, confidence score, top reasons, missing-data warnings, and preference matches/conflicts
 - Confidence engine
 - Preferences screen with DataStore-backed local persistence for food/drink, cosmetic, household, avoid-list, allergen, brand, and category preferences
+- Allergen list filtering for search results, Best by Category rankings, and alternative suggestions
 - Room scan history
 - Favorite, delete, clear, and search history actions
 - Manual product entry with user-added data source metadata
@@ -48,6 +49,7 @@ The app currently includes:
 - Personal Fit tests for lower-sugar/higher-protein matches, fragrance conflicts, and brand/category avoid lists
 - Alternative suggestion tests for lower-sugar drinks, fragrance-free hair care, and weak-data rejection
 - Category-best ranking tests for protein shakes and weak-data filtering
+- Allergen filtering tests for search/recommendation list behavior, category rankings, and alternatives
 - Alcoholic beverage scoring regression coverage so beer is reviewed with alcohol context instead of treated like an ordinary low-sugar drink
 - Repository regression coverage for reopening locally saved products when providers miss
 - Product data quality tests for complete, missing-nutrition, manual, and OCR-reviewed products
@@ -89,12 +91,12 @@ app/build/outputs/apk/release/app-release.apk
 
 ## Latest Release
 
-- Tag: `v0.1.7`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.7`
+- Tag: `v0.1.8`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.8`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-release-v0.1.7.apk`
-- Release notes: Adds product thumbnails to search results, introduces Best by Category rankings including protein shakes, and adjusts alcoholic beverage scoring so beer is reviewed with alcohol context instead of treated like an ordinary low-sugar drink. Build, unit tests, release build, and APK signature verification passed.
+  - `ClearCart-release-v0.1.8.apk`
+- Release notes: Refines Best by Category into a compact category browser with ranked category detail pages, adds category-aware fallback thumbnails, and filters allergen-conflicting products from search results, category rankings, and alternative suggestions. Build, unit tests, release build, and APK signature verification passed.
 
 ## Important Constraints
 

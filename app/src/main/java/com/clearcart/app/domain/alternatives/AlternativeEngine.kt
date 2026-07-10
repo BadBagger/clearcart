@@ -8,6 +8,7 @@ import com.clearcart.app.data.model.ProductScore
 import com.clearcart.app.data.model.ProductType
 import com.clearcart.app.data.model.UserPreferences
 import com.clearcart.app.data.repository.MockProducts
+import com.clearcart.app.domain.preferences.ProductPreferenceFilter
 import com.clearcart.app.domain.scoring.ScoringEngine
 import kotlin.math.abs
 
@@ -29,6 +30,7 @@ class AlternativeEngine(private val scoringEngine: ScoringEngine) {
             .distinctBy { it.barcode }
             .filter { it.barcode != current.barcode }
             .filter { it.barcode !in hiddenBarcodes }
+            .filter { ProductPreferenceFilter.visibleInRecommendationLists(it, preferences) }
             .filter { hasUsefulData(it) }
             .mapNotNull { alt ->
                 val altScore = scoringEngine.score(alt, preferences)

@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.clearcart.app.data.repository.AppContainer
+import com.clearcart.app.ui.screens.BestCategoryProductsScreen
 import com.clearcart.app.ui.screens.BestCategoriesScreen
 import com.clearcart.app.ui.screens.CompareScreen
 import com.clearcart.app.ui.screens.HistoryScreen
@@ -28,6 +29,10 @@ fun ClearCartApp(container: AppContainer) {
         composable("scanner") { ScannerScreen(container, navController) }
         composable("search") { SearchScreen(container, navController) }
         composable("best-categories") { BestCategoriesScreen(container, navController) }
+        composable(
+            "best-category/{category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType }),
+        ) { BestCategoryProductsScreen(container, navController, it.arguments?.getString("category").orEmpty()) }
         composable(
             "product/{barcode}",
             arguments = listOf(navArgument("barcode") { type = NavType.StringType }),

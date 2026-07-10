@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
@@ -64,7 +64,7 @@ fun HomeScreen(container: AppContainer, navController: NavController) {
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ElevatedButton(onClick = { navController.navigate("compare") }, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Default.CompareArrows, null)
+                Icon(Icons.AutoMirrored.Filled.CompareArrows, null)
                 Text("Compare")
             }
             ElevatedButton(onClick = { navController.navigate("preferences") }, modifier = Modifier.weight(1f)) {

@@ -16,7 +16,8 @@ class CategoryBestEngineTest {
 
     @Test
     fun ranksProteinShakesWhenCategoryDataExists() {
-        val picks = engine.bestByCategory(
+        val picks = engine.rankedProductsForCategory(
+            category = "Protein shakes",
             products = listOf(
                 proteinShake(
                     barcode = "shake-1",
@@ -34,16 +35,16 @@ class CategoryBestEngineTest {
                 ),
             ),
             preferences = UserPreferences(highProtein = true, lowSugar = true),
-            categories = listOf("Protein shakes"),
         )
 
-        assertEquals("Simple Protein Shake", picks.single().product.name)
-        assertTrue(picks.single().whyPicked.contains("ClearCart Score"))
+        assertEquals("Simple Protein Shake", picks.first().product.name)
+        assertEquals("Sugary Protein Shake", picks[1].product.name)
     }
 
     @Test
     fun skipsProductsWhenDataIsTooWeakForCategoryRanking() {
-        val picks = engine.bestByCategory(
+        val picks = engine.rankedProductsForCategory(
+            category = "Protein shakes",
             products = listOf(
                 Product(
                     id = "weak",
@@ -70,10 +71,40 @@ class CategoryBestEngineTest {
                 ),
             ),
             preferences = UserPreferences(),
-            categories = listOf("Protein shakes"),
         )
 
         assertTrue(picks.isEmpty())
+    }
+
+    @Test
+    fun categoryRankingsHideSelectedAllergens() {
+        val products = listOf(
+            proteinShake(
+                barcode = "milk-shake",
+                name = "Milk Protein Shake",
+                sugar = 1.0,
+                protein = 16.0,
+                allergens = listOf("milk"),
+                nutriScore = "a",
+            ),
+            proteinShake(
+                barcode = "pea-shake",
+                name = "Pea Protein Shake",
+                sugar = 2.0,
+                protein = 12.0,
+                allergens = emptyList(),
+                nutriScore = "b",
+            ),
+        )
+        val preferences = UserPreferences(allergensToAvoid = setOf("milk"))
+        val picks = engine.rankedProductsForCategory(
+            category = "Protein shakes",
+            products = products,
+            preferences = preferences,
+        )
+
+        assertEquals(listOf("Pea Protein Shake"), picks.map { it.product.name })
+        assertEquals(1, engine.hiddenByPreferenceCount("Protein shakes", products, preferences))
     }
 
     private fun proteinShake(
@@ -81,6 +112,7 @@ class CategoryBestEngineTest {
         name: String,
         sugar: Double?,
         protein: Double?,
+        allergens: List<String> = emptyList(),
         nutriScore: String? = "b",
         completeness: Int = 90,
     ) = Product(
@@ -91,7 +123,7 @@ class CategoryBestEngineTest {
         category = "protein shakes",
         imageUrl = null,
         ingredientsText = "Water, pea protein, vanilla.",
-        allergens = emptyList(),
+        allergens = allergens,
         labels = listOf("high protein"),
         nutrition = Nutrition(60.0, sugar, 0.12, 0.2, 1.0, protein),
         additives = emptyList(),

@@ -58,7 +58,7 @@ fun PreferencesScreen(container: AppContainer, navController: NavController) {
                 ingredientAvoidText = it
                 container.preferencesRepository.update { p -> p.copy(ingredientAvoidList = it.toPreferenceSet()) }
             }
-            PreferenceTextField("Allergens to flag", allergenText) {
+            PreferenceTextField("Allergens to hide from lists", allergenText) {
                 allergenText = it
                 container.preferencesRepository.update { p -> p.copy(allergensToAvoid = it.toPreferenceSet()) }
             }

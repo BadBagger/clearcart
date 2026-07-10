@@ -1,8 +1,6 @@
 package com.clearcart.app.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,15 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -35,8 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -44,9 +37,10 @@ import androidx.navigation.NavController
 import com.clearcart.app.data.model.Product
 import com.clearcart.app.data.model.ProductSource
 import com.clearcart.app.data.repository.AppContainer
+import com.clearcart.app.domain.preferences.ProductPreferenceFilter
 import com.clearcart.app.ui.components.ConfidenceBadge
+import com.clearcart.app.ui.components.ProductThumbnail
 import com.clearcart.app.ui.components.SectionCard
-import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,6 +52,12 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
     var loading by remember { mutableStateOf(false) }
     var searched by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    val visibleResults = remember(results, preferences) {
+        results.filter { ProductPreferenceFilter.visibleInRecommendationLists(it, preferences) }
+    }
+    val hiddenByAllergens = remember(results, preferences) {
+        ProductPreferenceFilter.hiddenAllergenCount(results, preferences)
+    }
 
     fun runSearch() {
         val trimmed = query.trim()
@@ -117,14 +117,34 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
             }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (!loading && searched && results.isEmpty() && error == null) {
+        if (hiddenByAllergens > 0) {
+            Text(
+                "$hiddenByAllergens result${if (hiddenByAllergens == 1) "" else "s"} hidden by your allergen filters.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        if (!loading && searched && visibleResults.isEmpty() && error == null) {
             SectionCard {
-                Text("No products found", fontWeight = FontWeight.SemiBold)
-                Text("Try a shorter product name, brand, or ingredient. If it is missing, you can add it manually.")
-                OutlinedButton(onClick = { navController.navigate("manual") }) { Text("Add Manually") }
+                Text(
+                    if (results.isEmpty()) "No products found" else "No visible products",
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    if (results.isEmpty()) {
+                        "Try a shorter product name, brand, or ingredient. If it is missing, you can add it manually."
+                    } else {
+                        "All matching products are hidden by your allergen filters. You can adjust filters in Preferences."
+                    },
+                )
+                if (results.isEmpty()) {
+                    OutlinedButton(onClick = { navController.navigate("manual") }) { Text("Add Manually") }
+                } else {
+                    OutlinedButton(onClick = { navController.navigate("preferences") }) { Text("Preferences") }
+                }
             }
         }
-        results.forEach { product ->
+        visibleResults.forEach { product ->
             val score = container.scoringEngine.score(product, preferences)
             SectionCard {
                 Row(
@@ -132,7 +152,7 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.Top,
                 ) {
-                    ProductSearchThumbnail(product)
+                    ProductThumbnail(product, size = 72.dp)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(
                             Modifier.fillMaxWidth(),
@@ -169,34 +189,6 @@ fun SearchScreen(container: AppContainer, navController: NavController) {
                     Text("Open Result")
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun ProductSearchThumbnail(product: Product) {
-    val shape = RoundedCornerShape(12.dp)
-    Box(
-        modifier = Modifier
-            .size(72.dp)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (product.imageUrl.isNullOrBlank()) {
-            Icon(
-                imageVector = Icons.Default.ShoppingBag,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(30.dp),
-            )
-        } else {
-            AsyncImage(
-                model = product.imageUrl,
-                contentDescription = product.name,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
         }
     }
 }
