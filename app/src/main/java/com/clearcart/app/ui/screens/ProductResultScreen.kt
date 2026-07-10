@@ -1,5 +1,6 @@
 package com.clearcart.app.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import android.net.Uri
 import coil3.compose.AsyncImage
 import com.clearcart.app.data.model.Product
 import com.clearcart.app.data.model.ProductScore
@@ -84,6 +84,17 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
             Text("Why this score?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             (s.positiveList + s.cautionList + s.explanationList).forEach {
                 Text("- ${it.text}\n${it.evidence}${if (it.isPreferenceBased) " This reflects your preferences." else ""}")
+            }
+        }
+        SectionCard {
+            Text("Ingredient notes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            val insights = remember(p, preferences) {
+                container.ingredientInsightEngine.explain(p, preferences)
+            }
+            insights.forEach {
+                Text(it.title, fontWeight = FontWeight.Medium)
+                Text(it.detail, style = MaterialTheme.typography.bodySmall)
+                Text("Found: ${it.evidence}${if (it.isPreferenceBased) " Based on your preferences." else ""}")
             }
         }
         SectionCard {

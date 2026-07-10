@@ -22,6 +22,7 @@ The app currently includes:
 - Open Beauty Facts Retrofit provider structure for cosmetics/personal care
 - Mock fallback product data
 - Product result screen
+- Plain-language Ingredient notes on product results for sugar terms, sodium wording, color additives, fragrance/parfum, allergens, additives, and missing ingredient data
 - Explainable scoring engine
 - Confidence engine
 - Preferences screen with local persistence
@@ -35,6 +36,7 @@ The app currently includes:
 - Privacy screen
 - Settings screen with future feature flags
 - Focused unit tests for scoring, preferences, and confidence logic
+- Ingredient explanation tests for preference-aware wording and non-medical language
 - Repository regression coverage for reopening locally saved products when providers miss
 - `ClearCartSummaryProvider` exposes a read-only Smithware Central summary at
   `content://com.clearcart.app.summary/summary` with scan count, favorites,

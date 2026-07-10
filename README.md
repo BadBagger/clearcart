@@ -12,6 +12,7 @@ It is inspired by the general product-scanner category, but it does not copy Yuk
 - Includes an Open Beauty Facts provider structure for cosmetics and personal care expansion.
 - Saves scan history locally with Room.
 - Shows a calm ClearCart score, grade, confidence badge, and explainable breakdown.
+- Explains ingredient notes in plain language without medical claims or scare wording.
 - Lets users set preferences such as allergens, low sugar, low sodium, fragrance avoidance, and simpler ingredient lists.
 - Supports manual product entry when barcode data is missing.
 - Includes a basic OCR label fallback screen that can hand parsed name and ingredient text into manual entry.

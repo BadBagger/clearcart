@@ -7,6 +7,7 @@ import com.clearcart.app.data.api.OpenFoodFactsApi
 import com.clearcart.app.data.db.AppDatabase
 import com.clearcart.app.domain.alternatives.AlternativeEngine
 import com.clearcart.app.domain.confidence.ConfidenceEngine
+import com.clearcart.app.domain.ingredients.IngredientInsightEngine
 import com.clearcart.app.domain.preferences.PreferencesRepository
 import com.clearcart.app.domain.scoring.ScoringEngine
 import retrofit2.Retrofit
@@ -32,6 +33,7 @@ class AppContainer(context: Context) {
     val preferencesRepository = PreferencesRepository(context)
     val scoringEngine = ScoringEngine()
     val confidenceEngine = ConfidenceEngine()
+    val ingredientInsightEngine = IngredientInsightEngine()
     val productRepository = ProductRepository(
         providers = listOf(
             OpenFoodFactsProvider(openFoodFactsApi, confidenceEngine),
