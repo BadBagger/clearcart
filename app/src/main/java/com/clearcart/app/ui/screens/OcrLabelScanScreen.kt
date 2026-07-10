@@ -1,5 +1,6 @@
 package com.clearcart.app.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,15 @@ fun OcrLabelScanScreen(container: AppContainer, navController: NavController) {
             ).joinToString("\n")
         }, modifier = Modifier.fillMaxWidth()) { Text("Analyze Text") }
         if (parsed.isNotBlank()) Text(parsed)
-        Button(onClick = { navController.navigate("manual") }, modifier = Modifier.fillMaxWidth()) { Text("Save as Manual Product") }
+        Button(
+            onClick = {
+                val extraction = OcrTextAnalyzer.parse(rawText)
+                navController.navigate(
+                    "manual?name=${Uri.encode(extraction.brandOrName.orEmpty())}" +
+                        "&ingredients=${Uri.encode(extraction.ingredients.orEmpty())}"
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Save as Manual Product") }
     }
 }

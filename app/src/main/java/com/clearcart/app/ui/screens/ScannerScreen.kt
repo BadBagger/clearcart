@@ -1,6 +1,7 @@
 package com.clearcart.app.ui.screens
 
 import android.Manifest
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.Camera
@@ -65,6 +66,7 @@ fun ScannerScreen(container: AppContainer, navController: NavController) {
     var manualCode by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var lastFailedBarcode by remember { mutableStateOf("") }
     var torchEnabled by remember { mutableStateOf(false) }
     var camera by remember { mutableStateOf<Camera?>(null) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -72,13 +74,17 @@ fun ScannerScreen(container: AppContainer, navController: NavController) {
     }
 
     fun lookup(code: String) {
-        if (loading || code.isBlank()) return
+        val normalizedCode = code.trim()
+        if (loading || normalizedCode.isBlank()) return
         loading = true
         error = null
         scope.launch {
-            container.productRepository.lookupProduct(code.trim(), preferences)
+            container.productRepository.lookupProduct(normalizedCode, preferences)
                 .onSuccess { navController.navigate("product/${it.barcode}") }
-                .onFailure { error = "Product not found. You can enter it manually or scan a label instead." }
+                .onFailure {
+                    lastFailedBarcode = normalizedCode
+                    error = "Product not found. You can enter it manually or scan a label instead."
+                }
             loading = false
         }
     }
@@ -151,7 +157,13 @@ fun ScannerScreen(container: AppContainer, navController: NavController) {
         )
         Button(onClick = { lookup(manualCode) }, modifier = Modifier.fillMaxWidth()) { Text("Look Up Barcode") }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            OutlinedButton(onClick = { navController.navigate("manual") }, modifier = Modifier.weight(1f)) { Text("Add Manually") }
+            OutlinedButton(
+                onClick = {
+                    val code = lastFailedBarcode.ifBlank { manualCode.trim() }
+                    navController.navigate("manual?barcode=${Uri.encode(code)}")
+                },
+                modifier = Modifier.weight(1f),
+            ) { Text("Add Manually") }
             OutlinedButton(onClick = { navController.navigate("ocr") }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Default.TextFields, null)
                 Text("Scan Label")

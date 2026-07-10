@@ -20,9 +20,13 @@ class ProductRepository(
     fun observeHistory(): Flow<List<ScanEntity>> = scanDao.observeAll()
 
     suspend fun lookupProduct(barcode: String, preferences: UserPreferences): Result<Product> = runCatching {
+        val normalizedBarcode = barcode.trim()
+        if (normalizedBarcode.isBlank()) throw ProductNotFoundException(barcode)
         val product = providers.firstNotNullOfOrNull { provider ->
-            runCatching { provider.lookup(barcode) }.getOrNull()
-        } ?: MockProducts.byBarcode(barcode) ?: throw ProductNotFoundException(barcode)
+            runCatching { provider.lookup(normalizedBarcode) }.getOrNull()
+        } ?: getProductSnapshot(normalizedBarcode)
+            ?: MockProducts.byBarcode(normalizedBarcode)
+            ?: throw ProductNotFoundException(normalizedBarcode)
         saveScan(product, preferences)
         product
     }

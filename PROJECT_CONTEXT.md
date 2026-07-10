@@ -16,6 +16,7 @@ The app currently includes:
 - Barcode scanner screen with CameraX and ML Kit Barcode Scanning
 - Dedicated product search screen for name, brand, category, or ingredient lookup
 - Manual barcode entry
+- Barcode lookup falls back to saved local product snapshots before showing a missing-product state
 - Open Food Facts Retrofit API structure
 - Modular product provider structure
 - Open Beauty Facts Retrofit provider structure for cosmetics/personal care
@@ -27,13 +28,14 @@ The app currently includes:
 - Room scan history
 - Favorite, delete, clear, and search history actions
 - Manual product entry
-- Basic OCR fallback screen and parser structure
+- Basic OCR fallback screen and parser structure with parsed name/ingredient handoff into manual entry
 - Product comparison screen
 - Explicit product selectors on the comparison screen
 - Full product snapshot persistence for richer history/comparison
 - Privacy screen
 - Settings screen with future feature flags
 - Focused unit tests for scoring, preferences, and confidence logic
+- Repository regression coverage for reopening locally saved products when providers miss
 - `ClearCartSummaryProvider` exposes a read-only Smithware Central summary at
   `content://com.clearcart.app.summary/summary` with scan count, favorites,
   average score, lower-confidence count, and recent product names only.

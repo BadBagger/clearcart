@@ -33,7 +33,31 @@ fun ClearCartApp(container: AppContainer) {
         composable("history") { HistoryScreen(container, navController) }
         composable("preferences") { PreferencesScreen(container, navController) }
         composable("compare") { CompareScreen(container, navController) }
-        composable("manual") { ManualEntryScreen(container, navController) }
+        composable(
+            "manual?barcode={barcode}&name={name}&ingredients={ingredients}",
+            arguments = listOf(
+                navArgument("barcode") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("name") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("ingredients") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+            ),
+        ) {
+            ManualEntryScreen(
+                container = container,
+                navController = navController,
+                initialBarcode = it.arguments?.getString("barcode").orEmpty(),
+                initialName = it.arguments?.getString("name").orEmpty(),
+                initialIngredients = it.arguments?.getString("ingredients").orEmpty(),
+            )
+        }
         composable("ocr") { OcrLabelScanScreen(container, navController) }
         composable("privacy") { PrivacyScreen(container, navController) }
         composable("settings") { SettingsScreen(navController) }

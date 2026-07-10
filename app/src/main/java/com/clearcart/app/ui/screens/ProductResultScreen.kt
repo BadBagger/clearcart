@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import android.net.Uri
 import coil3.compose.AsyncImage
 import com.clearcart.app.data.model.Product
 import com.clearcart.app.data.model.ProductScore
@@ -45,6 +46,9 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(barcode, preferences) {
+        product = null
+        score = null
+        error = null
         container.productRepository.lookupProduct(barcode, preferences)
             .onSuccess {
                 product = it
@@ -65,7 +69,11 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
     ) {
         if (p == null || s == null) {
             Text(error ?: "Loading product...")
-            if (error != null) Button(onClick = { navController.navigate("manual") }) { Text("Add Product Manually") }
+            if (error != null) {
+                Button(onClick = { navController.navigate("manual?barcode=${Uri.encode(barcode)}") }) {
+                    Text("Add Product Manually")
+                }
+            }
             return@Column
         }
         Text(p.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)

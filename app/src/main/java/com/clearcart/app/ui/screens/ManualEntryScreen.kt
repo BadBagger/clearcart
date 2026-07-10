@@ -31,14 +31,20 @@ import com.clearcart.app.data.repository.AppContainer
 import kotlinx.coroutines.launch
 
 @Composable
-fun ManualEntryScreen(container: AppContainer, navController: NavController) {
+fun ManualEntryScreen(
+    container: AppContainer,
+    navController: NavController,
+    initialBarcode: String = "",
+    initialName: String = "",
+    initialIngredients: String = "",
+) {
     val preferences by container.preferencesRepository.state.collectAsState()
     val scope = rememberCoroutineScope()
-    var barcode by remember { mutableStateOf("manual-${System.currentTimeMillis()}") }
-    var name by remember { mutableStateOf("") }
+    var barcode by remember(initialBarcode) { mutableStateOf(initialBarcode.ifBlank { "manual-${System.currentTimeMillis()}" }) }
+    var name by remember(initialName) { mutableStateOf(initialName) }
     var brand by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
-    var ingredients by remember { mutableStateOf("") }
+    var ingredients by remember(initialIngredients) { mutableStateOf(initialIngredients) }
     var sugar by remember { mutableStateOf("") }
     var sodium by remember { mutableStateOf("") }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
