@@ -4,7 +4,7 @@
 
 - GitHub: `https://github.com/BadBagger/clearcart`
 - Android package: `com.clearcart.app`
-- Latest APK release: `v0.1.5`
+- Latest APK release: `v0.1.6`
 
 ## Current State
 
@@ -85,12 +85,12 @@ app/build/outputs/apk/release/app-release.apk
 
 ## Latest Release
 
-- Tag: `v0.1.5`
-- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.5`
+- Tag: `v0.1.6`
+- URL: `https://github.com/BadBagger/clearcart/releases/tag/v0.1.6`
 - Assets:
   - `ClearCart.apk`
-  - `ClearCart-release-v0.1.5.apk`
-- Release notes: Publishes ClearCart with a real local Smithware release signing key for outside-Google-Play distribution. Build, unit tests, and APK signature verification passed.
+  - `ClearCart-release-v0.1.6.apk`
+- Release notes: Publishes explainable scoring, DataStore-backed preferences, plain-language ingredient controls, normalized product data improvements, and stronger alternative recommendations. Build, unit tests, release build, and APK signature verification passed.
 
 ## Important Constraints
 
@@ -132,7 +132,7 @@ DevHub detects updates from GitHub Releases with APK assets attached. Source-onl
 - Alternatives currently use mock/cached product data only, with stronger matching and weak-data filtering.
 - Compare screen now uses full cached product snapshots where available and lets users select the two scanned products to compare.
 - ProductRepository now exposes `lookupByBarcode`, `lookupFoodProduct`, `lookupBeautyProduct`, `saveToCache`, `getCachedProduct`, `saveManualProduct`, and `updateUserCorrection`.
-- Release signing is configured locally, and `v0.1.5` is the first release published with the Smithware release key.
+- Release signing is configured locally, and `v0.1.5` was the first release published with the Smithware release key.
 
 ## Suggested Next Steps
 
