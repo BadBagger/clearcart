@@ -182,20 +182,32 @@ class ScoringEngine(
         if ((preferences.avoidFragrance || preferences.sensitiveSkin) && hasFragrance(product)) {
             add(ScoreNote("Contains fragrance/parfum wording", "Some users with this preference choose fragrance-free products.", true))
         }
+        if (preferences.fewerAdditives && product.additives.isNotEmpty()) {
+            add(ScoreNote("Contains listed additives", "${product.additives.size} additive entries are listed by the source database.", true))
+        }
     }
 
     private fun preferenceMatches(product: Product, preferences: UserPreferences): List<ScoreNote> = buildList {
         if (preferences.lowSugar && (product.nutrition?.sugar100g ?: Double.MAX_VALUE) <= 5) {
-            add(ScoreNote("Matches low sugar preference", "${formatGrams(product.nutrition?.sugar100g)} sugar per 100g.", true))
+            add(ScoreNote("Matches your lower-sugar preference", "${formatGrams(product.nutrition?.sugar100g)} sugar per 100g.", true))
         }
         if (preferences.lowSodium && (product.nutrition?.sodium100g ?: Double.MAX_VALUE) <= 0.12) {
-            add(ScoreNote("Matches low sodium preference", "${formatGrams(product.nutrition?.sodium100g)} sodium per 100g.", true))
+            add(ScoreNote("Matches your lower-sodium preference", "${formatGrams(product.nutrition?.sodium100g)} sodium per 100g.", true))
+        }
+        if (preferences.fewerAdditives && product.additives.isEmpty()) {
+            add(ScoreNote("Matches your fewer-additives preference", "No additives are listed in the current source data.", true))
+        }
+        if (preferences.highProtein && (product.nutrition?.protein100g ?: 0.0) >= 12) {
+            add(ScoreNote("Matches your higher-protein preference", "${formatGrams(product.nutrition?.protein100g)} protein per 100g.", true))
         }
         if (preferences.simpleIngredients && product.ingredientsText.isNotBlank() && product.ingredientsText.split(',').size <= 8) {
             add(ScoreNote("Matches simpler ingredient preference", "The visible ingredient list is relatively short.", true))
         }
         if ((preferences.avoidFragrance || preferences.sensitiveSkin) && product.ingredientsText.isNotBlank() && !hasFragrance(product)) {
             add(ScoreNote("No fragrance wording found", "Matches the fragrance-related preferences you selected.", true))
+        }
+        if (preferences.preferFewerWarningLabels && product.labels.none { it.contains("warning", true) || it.contains("caution", true) }) {
+            add(ScoreNote("No warning-label wording found", "This matches your household label preference when label data is available.", true))
         }
     }
 
@@ -205,26 +217,57 @@ class ScoringEngine(
             add(ScoreNote("Contains allergens you chose to avoid", allergenConflicts.joinToString(), true))
         }
         if (preferences.lowSugar && (product.nutrition?.sugar100g ?: 0.0) > 8) {
-            add(ScoreNote("Flagged based on your low sugar preference", "${formatGrams(product.nutrition?.sugar100g)} sugar per 100g.", true))
+            add(ScoreNote("Higher sugar than your preference target", "${formatGrams(product.nutrition?.sugar100g)} sugar per 100g.", true))
         }
         if (preferences.lowSodium && (product.nutrition?.sodium100g ?: 0.0) > 0.3) {
-            add(ScoreNote("Flagged based on your low sodium preference", "${formatGrams(product.nutrition?.sodium100g)} sodium per 100g.", true))
+            add(ScoreNote("Higher sodium than your preference target", "${formatGrams(product.nutrition?.sodium100g)} sodium per 100g.", true))
         }
         val text = product.ingredientsText.lowercase()
+        if (preferences.fewerAdditives && product.additives.size >= 2) {
+            add(ScoreNote("Contains several additives", "${product.additives.size} additives are listed; this reflects your fewer-additives preference.", true))
+        }
+        if (preferences.highProtein && product.nutrition?.protein100g != null && product.nutrition.protein100g < 5) {
+            add(ScoreNote("Lower protein than your preference target", "${formatGrams(product.nutrition.protein100g)} protein per 100g.", true))
+        }
         if (preferences.glutenFree && ("gluten" in product.allergens.map { it.lowercase() } || text.contains("wheat"))) {
             add(ScoreNote("Flagged based on your gluten-free preference", "Ingredient or allergen text includes gluten-related wording.", true))
         }
         if (preferences.dairyFree && ("milk" in product.allergens.map { it.lowercase() } || text.contains("milk"))) {
             add(ScoreNote("Flagged based on your dairy-free preference", "Ingredient or allergen text includes milk-related wording.", true))
         }
+        if (preferences.vegetarian && containsAny(text, meatTerms)) {
+            add(ScoreNote("Flagged based on your vegetarian preference", "Ingredient text includes meat-related wording.", true))
+        }
+        if (preferences.vegan && (containsAny(text, animalIngredientTerms) || product.allergens.any { it.contains("milk", true) || it.contains("egg", true) })) {
+            add(ScoreNote("Flagged based on your vegan preference", "Ingredient or allergen text includes animal-derived wording.", true))
+        }
         if (preferences.avoidArtificialColors && text.contains("color")) {
             add(ScoreNote("Flagged based on your color additive preference", "Ingredient text includes color wording.", true))
+        }
+        if ((preferences.avoidFragrance || preferences.sensitiveSkin) && hasFragrance(product)) {
+            add(ScoreNote("Contains fragrance, which you asked ClearCart to flag", "This is a personal preference signal. Context matters by product type.", true))
         }
         preferences.ingredientAvoidList
             .filter { avoided -> text.contains(avoided, ignoreCase = true) }
             .forEach { avoided ->
                 add(ScoreNote("Flagged based on your ingredient preference", "$avoided appears in the ingredient text.", true))
             }
+        preferences.brandAvoidList
+            .filter { avoided -> product.brand.contains(avoided, ignoreCase = true) }
+            .forEach { avoided ->
+                add(ScoreNote("Brand you asked ClearCart to flag", "$avoided matches the product brand text.", true))
+            }
+        preferences.categoryAvoidList
+            .filter { avoided -> product.category.contains(avoided, ignoreCase = true) }
+            .forEach { avoided ->
+                add(ScoreNote("Category you asked ClearCart to flag", "$avoided matches the product category text.", true))
+            }
+        if (preferences.preferFewerWarningLabels && product.labels.any { it.contains("warning", true) || it.contains("caution", true) }) {
+            add(ScoreNote("Warning-label wording found", "This reflects your household label preference when source label data is available.", true))
+        }
+        if (product.confidenceLevel != ConfidenceLevel.High) {
+            add(ScoreNote("Data is incomplete, so personal fit may be less certain", "Preference checks depend on the product fields ClearCart can read.", true))
+        }
     }
 
     private fun missingDataWarnings(product: Product): List<ScoreNote> {
@@ -259,8 +302,12 @@ class ScoringEngine(
         var score = ((preference * 0.65) + (ingredientSimplicity(product) * 0.20) + (completeness(product) * 0.15)).roundToInt()
         if (preferences.lowSugar && (product.nutrition?.sugar100g ?: 0.0) > 8) score -= 18
         if (preferences.lowSodium && (product.nutrition?.sodium100g ?: 0.0) > 0.3) score -= 14
+        if (preferences.fewerAdditives && product.additives.size >= 2) score -= 12
+        if (preferences.highProtein && product.nutrition?.protein100g != null && product.nutrition.protein100g < 5) score -= 10
         if ((preferences.avoidFragrance || preferences.sensitiveSkin) && hasFragrance(product)) score -= 18
         if (allergenConflicts(product, preferences).isNotEmpty()) score -= 35
+        if (preferences.brandAvoidList.any { product.brand.contains(it, ignoreCase = true) }) score -= 25
+        if (preferences.categoryAvoidList.any { product.category.contains(it, ignoreCase = true) }) score -= 20
         return score.coerceIn(0, 100)
     }
 
@@ -332,8 +379,17 @@ class ScoringEngine(
         if (preferences.dairyFree && ("milk" in product.allergens.map { it.lowercase() } || text.contains("milk"))) score -= 35
         if (preferences.avoidArtificialColors && text.contains("color")) score -= 15
         if ((preferences.avoidFragrance || preferences.sensitiveSkin) && hasFragrance(product)) score -= 25
+        if (preferences.fewerAdditives && product.additives.size >= 2) score -= 12
+        if (preferences.vegetarian && containsAny(text, meatTerms)) score -= 25
+        if (preferences.vegan && containsAny(text, animalIngredientTerms)) score -= 30
         preferences.ingredientAvoidList.forEach { avoided ->
             if (text.contains(avoided, ignoreCase = true)) score -= 20
+        }
+        preferences.brandAvoidList.forEach { avoided ->
+            if (product.brand.contains(avoided, ignoreCase = true)) score -= 25
+        }
+        preferences.categoryAvoidList.forEach { avoided ->
+            if (product.category.contains(avoided, ignoreCase = true)) score -= 20
         }
         return score.coerceIn(20, 100)
     }
@@ -354,6 +410,9 @@ class ScoringEngine(
     private fun hasFragrance(product: Product): Boolean =
         product.ingredientsText.contains("fragrance", true) || product.ingredientsText.contains("parfum", true)
 
+    private fun containsAny(text: String, terms: List<String>): Boolean =
+        terms.any { text.contains(it, ignoreCase = true) }
+
     private fun gradeFor(score: Int) = when {
         score >= 86 -> Grade.Excellent
         score >= 72 -> Grade.Good
@@ -367,6 +426,9 @@ class ScoringEngine(
         return "${DecimalFormat("0.##").format(value)} g"
     }
 }
+
+private val meatTerms = listOf("beef", "pork", "chicken", "turkey", "fish", "gelatin", "lard")
+private val animalIngredientTerms = meatTerms + listOf("milk", "egg", "honey", "whey", "casein", "butter", "cream")
 
 fun ConfidenceLevel.display(): String = when (this) {
     ConfidenceLevel.High -> "High confidence"

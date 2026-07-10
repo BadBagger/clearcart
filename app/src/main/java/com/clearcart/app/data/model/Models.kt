@@ -105,6 +105,7 @@ data class UserPreferences(
     val dairyFree: Boolean = false,
     val lowSugar: Boolean = false,
     val lowSodium: Boolean = false,
+    val fewerAdditives: Boolean = false,
     val highProtein: Boolean = false,
     val avoidArtificialColors: Boolean = false,
     val avoidFragrance: Boolean = false,
@@ -114,6 +115,9 @@ data class UserPreferences(
     val preferOrganic: Boolean = false,
     val ingredientAvoidList: Set<String> = emptySet(),
     val ingredientOkayList: Set<String> = emptySet(),
+    val brandAvoidList: Set<String> = emptySet(),
+    val categoryAvoidList: Set<String> = emptySet(),
+    val preferFewerWarningLabels: Boolean = false,
     val scoringWeightOverrides: Map<String, Double> = emptyMap(),
 )
 

@@ -14,7 +14,7 @@ It is inspired by the general product-scanner category, but it does not copy Yuk
 - Saves scan history locally with Room.
 - Shows a calm ClearCart Score, Personal Fit score, confidence score, top reasons, and explainable breakdown.
 - Shows the full ingredient list, highlights ingredients worth reviewing, and explains ingredient tags in plain language without medical claims or scare wording.
-- Lets users set preferences such as allergens, low sugar, low sodium, fragrance avoidance, and simpler ingredient lists.
+- Stores local DataStore-backed preferences for food/drink, cosmetics, household products, ingredients, allergens, brands, and categories.
 - Lets users add ingredients to a local avoid list or okay list from product results.
 - Supports manual product entry when barcode data is missing.
 - Includes a basic OCR label fallback screen that can hand parsed name and ingredient text into manual entry.

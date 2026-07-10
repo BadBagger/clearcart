@@ -28,7 +28,7 @@ The app currently includes:
 - Explainable scoring engine
 - Explainable scoring output with separate ClearCart Score, Personal Fit, confidence score, top reasons, missing-data warnings, and preference matches/conflicts
 - Confidence engine
-- Preferences screen with local persistence
+- Preferences screen with DataStore-backed local persistence for food/drink, cosmetic, household, avoid-list, allergen, brand, and category preferences
 - Room scan history
 - Favorite, delete, clear, and search history actions
 - Manual product entry with user-added data source metadata
@@ -42,6 +42,7 @@ The app currently includes:
 - Ingredient explanation tests for preference-aware wording and non-medical language
 - Ingredient tag tests for sweetener, preservative, coloring, thickener, fragrance, user-avoided, and user-favorite classifications
 - Scoring tests for preference-separated personal fit, limited-data confidence behavior, and calm/non-fearmongering wording
+- Personal Fit tests for lower-sugar/higher-protein matches, fragrance conflicts, and brand/category avoid lists
 - Repository regression coverage for reopening locally saved products when providers miss
 - Product data quality tests for complete, missing-nutrition, manual, and OCR-reviewed products
 - `ClearCartSummaryProvider` exposes a read-only Smithware Central summary at

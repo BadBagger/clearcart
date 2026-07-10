@@ -30,7 +30,7 @@ class ScoringEngineTest {
 
         val score = engine.score(product, UserPreferences(lowSugar = true))
 
-        assertTrue(score.cautionList.any { it.text.contains("low sugar preference", ignoreCase = true) })
+        assertTrue(score.cautionList.any { it.text.contains("lower sugar", ignoreCase = true) || it.text.contains("low sugar", ignoreCase = true) })
         assertTrue(score.subscores.any { it.name == "Added sugar" && it.detail.contains("18 g") })
         assertTrue(score.scoreBreakdown.any { it.name == "Added sugar" && it.detail.contains("18 g") })
     }
@@ -53,7 +53,58 @@ class ScoringEngineTest {
 
         assertEquals(general.overallScore, lowSugarFit.overallScore)
         assertTrue(lowSugarFit.personalFitScore < general.personalFitScore)
-        assertTrue(lowSugarFit.preferenceConflicts.any { it.text.contains("low sugar", ignoreCase = true) || it.text.contains("preference", ignoreCase = true) })
+        assertTrue(lowSugarFit.preferenceConflicts.any { it.text.contains("sugar", ignoreCase = true) || it.text.contains("preference", ignoreCase = true) })
+    }
+
+    @Test
+    fun brandAndCategoryAvoidListsAffectPersonalFitOnly() {
+        val product = foodProduct().copy(
+            brand = "Test Brand",
+            category = "sweet cereal",
+        )
+
+        val general = engine.score(product, UserPreferences())
+        val personalized = engine.score(
+            product,
+            UserPreferences(
+                brandAvoidList = setOf("Test Brand"),
+                categoryAvoidList = setOf("sweet cereal"),
+            ),
+        )
+
+        assertEquals(general.overallScore, personalized.overallScore)
+        assertTrue(personalized.personalFitScore < general.personalFitScore)
+        assertTrue(personalized.preferenceConflicts.any { it.text.contains("Brand", ignoreCase = true) })
+        assertTrue(personalized.preferenceConflicts.any { it.text.contains("Category", ignoreCase = true) })
+    }
+
+    @Test
+    fun fragrancePreferenceCreatesCalmPreferenceConflict() {
+        val product = foodProduct().copy(ingredientsText = "Water, glycerin, fragrance.")
+
+        val score = engine.score(product, UserPreferences(avoidFragrance = true))
+
+        assertTrue(score.preferenceConflicts.any { it.text == "Contains fragrance, which you asked ClearCart to flag" })
+        assertTrue(score.preferenceConflicts.any { it.evidence.contains("Context matters", ignoreCase = true) })
+    }
+
+    @Test
+    fun lowerSugarPreferenceCanCreatePositiveMatch() {
+        val product = foodProduct(
+            nutrition = Nutrition(
+                energyKcal100g = 120.0,
+                sugar100g = 3.0,
+                sodium100g = 0.08,
+                saturatedFat100g = 0.5,
+                fiber100g = 5.0,
+                protein100g = 13.0,
+            ),
+        )
+
+        val score = engine.score(product, UserPreferences(lowSugar = true, highProtein = true))
+
+        assertTrue(score.preferenceMatches.any { it.text == "Matches your lower-sugar preference" })
+        assertTrue(score.preferenceMatches.any { it.text == "Matches your higher-protein preference" })
     }
 
     @Test
