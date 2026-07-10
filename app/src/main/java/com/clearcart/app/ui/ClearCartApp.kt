@@ -34,7 +34,7 @@ fun ClearCartApp(container: AppContainer) {
         composable("preferences") { PreferencesScreen(container, navController) }
         composable("compare") { CompareScreen(container, navController) }
         composable(
-            "manual?barcode={barcode}&name={name}&ingredients={ingredients}",
+            "manual?barcode={barcode}&name={name}&ingredients={ingredients}&source={source}",
             arguments = listOf(
                 navArgument("barcode") {
                     type = NavType.StringType
@@ -48,6 +48,10 @@ fun ClearCartApp(container: AppContainer) {
                     type = NavType.StringType
                     defaultValue = ""
                 },
+                navArgument("source") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
             ),
         ) {
             ManualEntryScreen(
@@ -56,6 +60,7 @@ fun ClearCartApp(container: AppContainer) {
                 initialBarcode = it.arguments?.getString("barcode").orEmpty(),
                 initialName = it.arguments?.getString("name").orEmpty(),
                 initialIngredients = it.arguments?.getString("ingredients").orEmpty(),
+                initialSource = it.arguments?.getString("source").orEmpty(),
             )
         }
         composable("ocr") { OcrLabelScanScreen(container, navController) }

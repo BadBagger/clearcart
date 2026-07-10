@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.clearcart.app.data.model.Product
+import com.clearcart.app.data.model.ProductDataQuality
+import com.clearcart.app.data.model.ProductDataQualityLabel
 import com.clearcart.app.data.model.ProductScore
 import com.clearcart.app.data.repository.AppContainer
 import com.clearcart.app.ui.components.ScoreHeader
@@ -80,6 +82,16 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
         Text(listOf(p.brand, p.category).filter { it.isNotBlank() }.joinToString(" / "))
         p.imageUrl?.let { AsyncImage(model = it, contentDescription = p.name, modifier = Modifier.fillMaxWidth()) }
         SectionCard { ScoreHeader(s) }
+        SectionCard {
+            val qualityLabel = ProductDataQuality.qualityLabel(p)
+            Text("Data quality", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("${qualityLabel.label} / ${p.dataCompletenessScore}% complete")
+            if (qualityLabel != ProductDataQualityLabel.Complete) {
+                Text("Some product details are missing. ClearCart can still help, but this score may be less confident.")
+                Text(ProductDataQuality.missingDataCopy(p), style = MaterialTheme.typography.bodySmall)
+            }
+            Text("Source: ${p.dataSource.displayName()}", style = MaterialTheme.typography.bodySmall)
+        }
         SectionCard {
             Text("Why this score?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             (s.positiveList + s.cautionList + s.explanationList).forEach {
@@ -136,4 +148,12 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
         }
         Text("For medical dietary needs, check with a professional.")
     }
+}
+
+private fun com.clearcart.app.data.model.ProductSource.displayName(): String = when (this) {
+    com.clearcart.app.data.model.ProductSource.OpenFoodFacts -> "Open Food Facts"
+    com.clearcart.app.data.model.ProductSource.OpenBeautyFacts -> "Open Beauty Facts"
+    com.clearcart.app.data.model.ProductSource.Mock -> "Mock data"
+    com.clearcart.app.data.model.ProductSource.UserEntered -> "User-added"
+    com.clearcart.app.data.model.ProductSource.Ocr -> "OCR label scan"
 }

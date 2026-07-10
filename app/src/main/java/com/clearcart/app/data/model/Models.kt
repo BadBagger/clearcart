@@ -1,6 +1,7 @@
 package com.clearcart.app.data.model
 
 data class Product(
+    val id: String = "",
     val barcode: String,
     val name: String,
     val brand: String,
@@ -13,10 +14,16 @@ data class Product(
     val additives: List<String>,
     val novaGroup: Int?,
     val nutriScore: String?,
+    val quantity: String? = null,
+    val servingSize: String? = null,
     val source: ProductSource,
+    val dataSource: ProductSource = source,
+    val dataCompletenessScore: Int = 0,
     val lastUpdated: Long?,
     val confidenceLevel: ConfidenceLevel,
     val type: ProductType = ProductType.Food,
+    val productType: ProductType = type,
+    val userEdited: Boolean = false,
     val rawResponse: String? = null,
 )
 
@@ -29,9 +36,18 @@ data class Nutrition(
     val protein100g: Double?,
 )
 
-enum class ProductType { Food, Cosmetic, Household }
+enum class ProductType { Food, Drink, Cosmetic, Household, Unknown }
 enum class ProductSource { OpenFoodFacts, OpenBeautyFacts, Mock, UserEntered, Ocr }
 enum class ConfidenceLevel { High, Medium, Low, MissingData, UserEntered }
+
+enum class ProductDataQualityLabel(val label: String) {
+    Complete("Complete"),
+    Partial("Partial"),
+    MissingIngredients("Missing ingredients"),
+    MissingNutrition("Missing nutrition"),
+    UserAdded("User-added"),
+    NeedsReview("Needs review"),
+}
 
 data class ProductScore(
     val overallScore: Int,

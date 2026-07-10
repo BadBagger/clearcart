@@ -6,6 +6,7 @@ import com.clearcart.app.data.api.OpenFoodFactsApi
 import com.clearcart.app.data.model.ConfidenceLevel
 import com.clearcart.app.data.model.Nutrition
 import com.clearcart.app.data.model.Product
+import com.clearcart.app.data.model.ProductDataQuality
 import com.clearcart.app.data.model.ProductSource
 import com.clearcart.app.data.model.ProductType
 import com.clearcart.app.domain.confidence.ConfidenceEngine
@@ -90,6 +91,7 @@ private fun OffProduct.toProduct(
     confidenceEngine: ConfidenceEngine,
 ): Product {
     val product = Product(
+        id = barcode,
         barcode = barcode,
         name = product_name?.takeIf { it.isNotBlank() } ?: "Unnamed product",
         brand = brands.orEmpty(),
@@ -109,11 +111,16 @@ private fun OffProduct.toProduct(
         additives = additives_tags.orEmpty().map { it.removePrefix("en:").replace('-', ' ') },
         novaGroup = nova_group,
         nutriScore = nutriscore_grade,
+        quantity = quantity,
+        servingSize = serving_size,
         source = source,
+        dataSource = source,
         lastUpdated = last_modified_t,
         confidenceLevel = ConfidenceLevel.MissingData,
         type = type,
+        productType = type,
         rawResponse = raw,
     )
-    return product.copy(confidenceLevel = confidenceEngine.confidenceFor(product))
+    val withConfidence = product.copy(confidenceLevel = confidenceEngine.confidenceFor(product))
+    return ProductDataQuality.normalize(withConfidence)
 }

@@ -5,18 +5,18 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface OpenFoodFactsApi {
-    @GET("api/v2/product/{barcode}.json?fields=code,status,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
+    @GET("api/v2/product/{barcode}.json?fields=code,status,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,quantity,serving_size,last_modified_t")
     suspend fun product(@Path("barcode") barcode: String): OffResponse
 
-    @GET("cgi/search.pl?search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
+    @GET("cgi/search.pl?search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,quantity,serving_size,last_modified_t")
     suspend fun search(@Query("search_terms") query: String): OffSearchResponse
 }
 
 interface OpenBeautyFactsApi {
-    @GET("api/v2/product/{barcode}.json?fields=code,status,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
+    @GET("api/v2/product/{barcode}.json?fields=code,status,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,quantity,serving_size,last_modified_t")
     suspend fun product(@Path("barcode") barcode: String): OffResponse
 
-    @GET("cgi/search.pl?search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,last_modified_t")
+    @GET("cgi/search.pl?search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,categories_tags,image_front_url,ingredients_text,allergens_tags,labels_tags,additives_tags,nova_group,nutriscore_grade,nutriments,quantity,serving_size,last_modified_t")
     suspend fun search(@Query("search_terms") query: String): OffSearchResponse
 }
 
@@ -42,6 +42,8 @@ data class OffProduct(
     val nova_group: Int?,
     val nutriscore_grade: String?,
     val nutriments: OffNutriments?,
+    val quantity: String?,
+    val serving_size: String?,
     val last_modified_t: Long?,
 )
 

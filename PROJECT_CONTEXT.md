@@ -16,20 +16,22 @@ The app currently includes:
 - Barcode scanner screen with CameraX and ML Kit Barcode Scanning
 - Dedicated product search screen for name, brand, category, or ingredient lookup
 - Manual barcode entry
-- Barcode lookup falls back to saved local product snapshots before showing a missing-product state
+- Normalized Product model with id, barcode, quantity/serving size, productType, dataSource, dataCompletenessScore, lastUpdated, and userEdited metadata
+- Barcode lookup uses cached local product snapshots immediately before refreshing from API providers when possible
 - Open Food Facts Retrofit API structure
 - Modular product provider structure
 - Open Beauty Facts Retrofit provider structure for cosmetics/personal care
 - Mock fallback product data
 - Product result screen
+- Product result data-quality labels for Complete, Partial, Missing ingredients, Missing nutrition, User-added, and Needs review
 - Plain-language Ingredient notes on product results for sugar terms, sodium wording, color additives, fragrance/parfum, allergens, additives, and missing ingredient data
 - Explainable scoring engine
 - Confidence engine
 - Preferences screen with local persistence
 - Room scan history
 - Favorite, delete, clear, and search history actions
-- Manual product entry
-- Basic OCR fallback screen and parser structure with parsed name/ingredient handoff into manual entry
+- Manual product entry with user-added data source metadata
+- Basic OCR fallback screen and parser structure with parsed name/ingredient handoff into manual entry while preserving OCR data source metadata
 - Product comparison screen
 - Explicit product selectors on the comparison screen
 - Full product snapshot persistence for richer history/comparison
@@ -38,6 +40,7 @@ The app currently includes:
 - Focused unit tests for scoring, preferences, and confidence logic
 - Ingredient explanation tests for preference-aware wording and non-medical language
 - Repository regression coverage for reopening locally saved products when providers miss
+- Product data quality tests for complete, missing-nutrition, manual, and OCR-reviewed products
 - `ClearCartSummaryProvider` exposes a read-only Smithware Central summary at
   `content://com.clearcart.app.summary/summary` with scan count, favorites,
   average score, lower-confidence count, and recent product names only.
@@ -122,6 +125,7 @@ DevHub detects updates from GitHub Releases with APK assets attached. Source-onl
 - Open Beauty Facts support now has a separate Retrofit provider structure, but needs broader real-world validation against cosmetics barcodes.
 - Alternatives currently use mock/cached product data only.
 - Compare screen now uses full cached product snapshots where available and lets users select the two scanned products to compare.
+- ProductRepository now exposes `lookupByBarcode`, `lookupFoodProduct`, `lookupBeautyProduct`, `saveToCache`, `getCachedProduct`, `saveManualProduct`, and `updateUserCorrection`.
 - Release signing is configured locally, and `v0.1.5` is the first release published with the Smithware release key.
 
 ## Suggested Next Steps

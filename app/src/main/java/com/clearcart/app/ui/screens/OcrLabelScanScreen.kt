@@ -46,7 +46,8 @@ fun OcrLabelScanScreen(container: AppContainer, navController: NavController) {
                 val extraction = OcrTextAnalyzer.parse(rawText)
                 navController.navigate(
                     "manual?name=${Uri.encode(extraction.brandOrName.orEmpty())}" +
-                        "&ingredients=${Uri.encode(extraction.ingredients.orEmpty())}"
+                        "&ingredients=${Uri.encode(extraction.ingredients.orEmpty())}" +
+                        "&source=ocr"
                 )
             },
             modifier = Modifier.fillMaxWidth(),

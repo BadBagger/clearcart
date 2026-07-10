@@ -37,6 +37,7 @@ fun ManualEntryScreen(
     initialBarcode: String = "",
     initialName: String = "",
     initialIngredients: String = "",
+    initialSource: String = "",
 ) {
     val preferences by container.preferencesRepository.state.collectAsState()
     val scope = rememberCoroutineScope()
@@ -47,9 +48,10 @@ fun ManualEntryScreen(
     var ingredients by remember(initialIngredients) { mutableStateOf(initialIngredients) }
     var sugar by remember { mutableStateOf("") }
     var sodium by remember { mutableStateOf("") }
+    val source = if (initialSource.equals("ocr", ignoreCase = true)) ProductSource.Ocr else ProductSource.UserEntered
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("Manual Product Entry", style = MaterialTheme.typography.headlineMedium)
-        Text("Saved locally only. Confidence is marked as user-entered.")
+        Text(if (source == ProductSource.Ocr) "Saved locally only from reviewed label text. Confidence is marked as OCR label scan." else "Saved locally only. Confidence is marked as user-entered.")
         OutlinedTextField(barcode, { barcode = it }, label = { Text("Barcode or local ID") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(name, { name = it }, label = { Text("Product name") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(brand, { brand = it }, label = { Text("Brand") }, modifier = Modifier.fillMaxWidth())
@@ -71,9 +73,11 @@ fun ManualEntryScreen(
                 additives = emptyList(),
                 novaGroup = null,
                 nutriScore = null,
-                source = ProductSource.UserEntered,
+                source = source,
+                dataSource = source,
                 lastUpdated = null,
                 confidenceLevel = ConfidenceLevel.UserEntered,
+                userEdited = true,
             )
             scope.launch {
                 container.productRepository.saveManual(product, preferences)

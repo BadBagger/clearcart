@@ -5,6 +5,7 @@ import com.clearcart.app.data.db.ScanEntity
 import com.clearcart.app.data.model.ConfidenceLevel
 import com.clearcart.app.data.model.Nutrition
 import com.clearcart.app.data.model.Product
+import com.clearcart.app.data.model.ProductDataQuality
 import com.clearcart.app.data.model.ProductSource
 import com.clearcart.app.data.model.UserPreferences
 import com.clearcart.app.domain.scoring.ScoringEngine
@@ -54,6 +55,28 @@ class ProductRepositoryTest {
         assertEquals(product.name, result.getOrThrow().name)
         assertEquals(ProductSource.UserEntered, result.getOrThrow().source)
     }
+
+    @Test
+    fun lookupByBarcodeReturnsCachedProductBeforeProviderResult() = runBlocking {
+        val dao = FakeScanDao()
+        val repository = ProductRepository(
+            providers = listOf(RenamedProvider),
+            scanDao = dao,
+            scoringEngine = ScoringEngine(),
+        )
+        val cachedProduct = ProductDataQuality.normalize(
+            product(
+                barcode = "cached-1",
+                name = "Cached Product",
+                source = ProductSource.UserEntered,
+            )
+        )
+
+        repository.saveManualProduct(cachedProduct, UserPreferences())
+        val result = repository.lookupByBarcode("cached-1", UserPreferences())
+
+        assertEquals("Cached Product", result.getOrThrow().name)
+    }
 }
 
 private object AlwaysMissingProvider : ProductDataProvider {
@@ -61,6 +84,37 @@ private object AlwaysMissingProvider : ProductDataProvider {
     override suspend fun lookup(barcode: String): Product? = null
     override suspend fun search(query: String): List<Product> = emptyList()
 }
+
+private object RenamedProvider : ProductDataProvider {
+    override val name = "Remote"
+    override suspend fun lookup(barcode: String): Product? =
+        product(barcode = barcode, name = "Remote Product", source = ProductSource.OpenFoodFacts)
+
+    override suspend fun search(query: String): List<Product> = emptyList()
+}
+
+private fun product(
+    barcode: String,
+    name: String,
+    source: ProductSource,
+) = Product(
+    barcode = barcode,
+    name = name,
+    brand = "Test Brand",
+    category = "snack",
+    imageUrl = null,
+    ingredientsText = "Oats, salt.",
+    allergens = emptyList(),
+    labels = emptyList(),
+    nutrition = Nutrition(null, 2.0, 0.1, null, null, null),
+    additives = emptyList(),
+    novaGroup = null,
+    nutriScore = null,
+    source = source,
+    dataSource = source,
+    lastUpdated = null,
+    confidenceLevel = ConfidenceLevel.Medium,
+)
 
 private class FakeScanDao : ScanDao {
     private val rows = LinkedHashMap<String, ScanEntity>()

@@ -3,11 +3,14 @@ package com.clearcart.app.data.repository
 import com.clearcart.app.data.model.ConfidenceLevel
 import com.clearcart.app.data.model.Nutrition
 import com.clearcart.app.data.model.Product
+import com.clearcart.app.data.model.ProductDataQuality
 import com.clearcart.app.data.model.ProductSource
+import com.clearcart.app.data.model.ProductType
 
 object MockProducts {
     private val products = listOf(
-        Product(
+        ProductDataQuality.normalize(Product(
+            id = "0123456789012",
             barcode = "0123456789012",
             name = "Bright Oat Crunch",
             brand = "Sample Pantry",
@@ -20,11 +23,17 @@ object MockProducts {
             additives = emptyList(),
             novaGroup = 3,
             nutriScore = "b",
+            quantity = "12 oz",
+            servingSize = "40 g",
             source = ProductSource.Mock,
+            dataSource = ProductSource.Mock,
             lastUpdated = System.currentTimeMillis() / 1000,
             confidenceLevel = ConfidenceLevel.High,
-        ),
-        Product(
+            type = ProductType.Food,
+            productType = ProductType.Food,
+        )),
+        ProductDataQuality.normalize(Product(
+            id = "0099999999999",
             barcode = "0099999999999",
             name = "Daily Fresh Body Wash",
             brand = "Sample Care",
@@ -37,11 +46,15 @@ object MockProducts {
             additives = emptyList(),
             novaGroup = null,
             nutriScore = null,
+            quantity = "16 fl oz",
+            servingSize = null,
             source = ProductSource.Mock,
+            dataSource = ProductSource.Mock,
             lastUpdated = null,
             confidenceLevel = ConfidenceLevel.Medium,
-            type = com.clearcart.app.data.model.ProductType.Cosmetic,
-        ),
+            type = ProductType.Cosmetic,
+            productType = ProductType.Cosmetic,
+        )),
     )
 
     fun byBarcode(barcode: String): Product? = products.firstOrNull { it.barcode == barcode }
