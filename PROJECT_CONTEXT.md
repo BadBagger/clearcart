@@ -34,6 +34,7 @@ The app currently includes:
 - Manual product entry with user-added data source metadata
 - Basic OCR fallback screen and parser structure with parsed name/ingredient handoff into manual entry while preserving OCR data source metadata
 - Product comparison screen
+- Alternative suggestions that rank cached/mock candidates by category, product type, use case, score, Personal Fit, preference conflicts, package similarity, and data quality
 - Explicit product selectors on the comparison screen
 - Full product snapshot persistence for richer history/comparison
 - Privacy screen
@@ -43,6 +44,7 @@ The app currently includes:
 - Ingredient tag tests for sweetener, preservative, coloring, thickener, fragrance, user-avoided, and user-favorite classifications
 - Scoring tests for preference-separated personal fit, limited-data confidence behavior, and calm/non-fearmongering wording
 - Personal Fit tests for lower-sugar/higher-protein matches, fragrance conflicts, and brand/category avoid lists
+- Alternative suggestion tests for lower-sugar drinks, fragrance-free hair care, and weak-data rejection
 - Repository regression coverage for reopening locally saved products when providers miss
 - Product data quality tests for complete, missing-nutrition, manual, and OCR-reviewed products
 - `ClearCartSummaryProvider` exposes a read-only Smithware Central summary at
@@ -127,7 +129,7 @@ DevHub detects updates from GitHub Releases with APK assets attached. Source-onl
 
 - Live camera OCR capture is not wired yet; the OCR screen currently supports editable text and parsing structure.
 - Open Beauty Facts support now has a separate Retrofit provider structure, but needs broader real-world validation against cosmetics barcodes.
-- Alternatives currently use mock/cached product data only.
+- Alternatives currently use mock/cached product data only, with stronger matching and weak-data filtering.
 - Compare screen now uses full cached product snapshots where available and lets users select the two scanned products to compare.
 - ProductRepository now exposes `lookupByBarcode`, `lookupFoodProduct`, `lookupBeautyProduct`, `saveToCache`, `getCachedProduct`, `saveManualProduct`, and `updateUserCorrection`.
 - Release signing is configured locally, and `v0.1.5` is the first release published with the Smithware release key.

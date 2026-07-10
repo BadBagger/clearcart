@@ -16,6 +16,7 @@ It is inspired by the general product-scanner category, but it does not copy Yuk
 - Shows the full ingredient list, highlights ingredients worth reviewing, and explains ingredient tags in plain language without medical claims or scare wording.
 - Stores local DataStore-backed preferences for food/drink, cosmetics, household products, ingredients, allergens, brands, and categories.
 - Lets users add ingredients to a local avoid list or okay list from product results.
+- Suggests practical alternatives from cached and mock product data using category, product type, use case, score, Personal Fit, conflicts, and data quality.
 - Supports manual product entry when barcode data is missing.
 - Includes a basic OCR label fallback screen that can hand parsed name and ingredient text into manual entry.
 - Reopens saved local products from history/manual entry even when external providers miss.

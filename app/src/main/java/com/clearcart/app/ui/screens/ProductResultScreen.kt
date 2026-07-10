@@ -31,12 +31,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.clearcart.app.data.model.AlternativeSuggestion
 import com.clearcart.app.data.model.Product
 import com.clearcart.app.data.model.ProductDataQuality
 import com.clearcart.app.data.model.ProductDataQualityLabel
 import com.clearcart.app.data.model.ProductScore
 import com.clearcart.app.data.repository.AppContainer
+import com.clearcart.app.data.repository.MockProducts
 import com.clearcart.app.domain.ingredients.IngredientInsight
+import com.clearcart.app.domain.scoring.display
 import com.clearcart.app.ui.components.ScoreHeader
 import com.clearcart.app.ui.components.SectionCard
 import kotlinx.coroutines.launch
@@ -44,10 +47,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProductResultScreen(container: AppContainer, navController: NavController, barcode: String) {
     val preferences by container.preferencesRepository.state.collectAsState()
+    val cachedProducts by container.productRepository.observeProductsFromHistory().collectAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
     var product by remember { mutableStateOf<Product?>(null) }
     var score by remember { mutableStateOf<ProductScore?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    var hiddenAlternatives by remember(barcode) { mutableStateOf(setOf<String>()) }
 
     LaunchedEffect(barcode, preferences) {
         product = null
@@ -185,14 +190,33 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
         }
         SectionCard {
             Text("Alternatives", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            val alternatives = container.alternativeEngine.suggestFor(p, preferences)
+            val alternatives = remember(p, preferences, cachedProducts, hiddenAlternatives) {
+                container.alternativeEngine.suggestFor(
+                    product = p,
+                    preferences = preferences,
+                    candidates = cachedProducts + MockProducts.all(),
+                    hiddenBarcodes = hiddenAlternatives,
+                )
+            }
             if (alternatives.isEmpty()) {
-                Text("No stronger alternatives are available from cached or mock data yet.")
+                Text("No strong alternatives found yet. Scan more products to improve suggestions.")
+                Button(onClick = { navController.navigate("scanner") }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Scan another product")
+                }
             } else {
                 alternatives.forEach {
-                    Text("${it.product.name} / ${it.score.overallScore}")
-                    Text(it.whyBetter)
-                    it.tradeoff?.let { tradeoff -> Text(tradeoff) }
+                    AlternativeCard(
+                        suggestion = it,
+                        onSave = {
+                            scope.launch {
+                                container.productRepository.saveSearchedProduct(it.product, preferences)
+                                container.productRepository.setFavorite(it.product.barcode, true)
+                            }
+                        },
+                        onCompare = { navController.navigate("compare") },
+                        onScanAnother = { navController.navigate("scanner") },
+                        onHide = { hiddenAlternatives = hiddenAlternatives + it.product.barcode },
+                    )
                 }
             }
         }
@@ -209,6 +233,50 @@ fun ProductResultScreen(container: AppContainer, navController: NavController, b
             }
         }
         Text("For medical dietary needs, check with a professional.")
+    }
+}
+
+@Composable
+private fun AlternativeCard(
+    suggestion: AlternativeSuggestion,
+    onSave: () -> Unit,
+    onCompare: () -> Unit,
+    onScanAnother: () -> Unit,
+    onHide: () -> Unit,
+) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(suggestion.product.name, fontWeight = FontWeight.SemiBold)
+        Text(suggestion.product.brand.ifBlank { "Unknown brand" }, style = MaterialTheme.typography.bodySmall)
+        Text("Score ${suggestion.score.overallScore} / Personal Fit ${suggestion.score.personalFitScore}")
+        Text("Data confidence: ${suggestion.dataConfidence.display()}", style = MaterialTheme.typography.bodySmall)
+        Text("Why suggested", fontWeight = FontWeight.Medium)
+        Text(suggestion.whyBetter)
+        Text("What is better", fontWeight = FontWeight.Medium)
+        Text(suggestion.whatIsBetter)
+        suggestion.concern?.let {
+            Text("Worth checking", fontWeight = FontWeight.Medium)
+            Text(it)
+        }
+        suggestion.tradeoff?.let {
+            Text("Tradeoff", fontWeight = FontWeight.Medium)
+            Text(it)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = onSave, modifier = Modifier.weight(1f)) {
+                Text("Save")
+            }
+            OutlinedButton(onClick = onCompare, modifier = Modifier.weight(1f)) {
+                Text("Compare")
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = onScanAnother, modifier = Modifier.weight(1f)) {
+                Text("Scan another")
+            }
+            OutlinedButton(onClick = onHide, modifier = Modifier.weight(1f)) {
+                Text("Hide")
+            }
+        }
     }
 }
 

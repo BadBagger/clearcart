@@ -126,4 +126,8 @@ data class AlternativeSuggestion(
     val score: ProductScore,
     val whyBetter: String,
     val tradeoff: String?,
+    val whatIsBetter: String = whyBetter,
+    val concern: String? = tradeoff,
+    val dataConfidence: ConfidenceLevel = product.confidenceLevel,
+    val matchScore: Int = 0,
 )
